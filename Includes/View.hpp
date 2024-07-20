@@ -3,20 +3,17 @@
 #include "Runtime/Core.hpp"
 #include "Runtime/Grid.hpp"
 
-namespace Chicane
+namespace Factory
 {
-    namespace Editor
+    class View : public Chicane::Grid::View
     {
-        class View : public Grid::View
-        {
-        public:
-            View();
+    public:
+        View();
 
-        private:
-            std::uint64_t getFPS(Grid::ComponentEvent inEvent);
-            std::string getFrametime(Grid::ComponentEvent inEvent);
+    private:
+        std::uint64_t getFPS(Chicane::Grid::ComponentEvent inEvent);
+        std::string getFrametime(Chicane::Grid::ComponentEvent inEvent);
 
-            int addActor(Grid::ComponentEvent inEvent);
-        };
-    }
+        int addActor(Chicane::Grid::ComponentEvent inEvent);
+    };
 }

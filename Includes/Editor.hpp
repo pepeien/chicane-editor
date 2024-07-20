@@ -3,10 +3,7 @@
 #include "Runtime/Core.hpp"
 #include "Runtime/Game.hpp"
 
-namespace Chicane
+namespace Factory
 {
-    namespace Editor
-    {
-        void run();
-    }
+    void run();
 }

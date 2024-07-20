@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     try
     {
-        Chicane::Editor::run();
+        Factory::run();
     }
     catch (const std::exception& e)
     {

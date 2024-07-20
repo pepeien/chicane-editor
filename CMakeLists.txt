@@ -81,3 +81,6 @@ target_link_libraries(
 
 ##############  Add subdirectories  #######################
 add_subdirectory(Content)
+
+##############  Add dependencies  #######################
+add_dependencies(${EDITOR_TARGET_NAME} ${CONTENT_TARGET_NAME})

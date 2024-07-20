@@ -4,42 +4,39 @@
 #include "Runtime/Runtime.hpp"
 #include "Runtime/Renderer.hpp"
 
-namespace Chicane
+namespace Factory
 {
-    namespace Editor
+    class Layer : public Chicane::Layer
     {
-        class GridLayer : public Layer
-        {
-        public:
-            GridLayer(Window* inWindow);
-            ~GridLayer();
+    public:
+        Layer(Chicane::Window* inWindow);
+        ~Layer();
 
-        public:
-            void build() override;
-            void destroy() override;
-            void rebuild() override;
+    public:
+        void build() override;
+        void destroy() override;
+        void rebuild() override;
 
-            void render(
-                Frame::Instance& outFrame,
-                const vk::CommandBuffer& inCommandBuffer,
-                const vk::Extent2D& inSwapChainExtent
-            ) override;
+        void render(
+            Chicane::Frame::Instance& outFrame,
+            const vk::CommandBuffer& inCommandBuffer,
+            const vk::Extent2D& inSwapChainExtent
+        ) override;
 
-        private:
-            void initFrameDescriptorSetLayout();
-            void initGraphicsPipeline();
-            void initFramebuffers();
-            void initFrameResources();
-            void initVertexBuffers();
+    private:
+        void initFrameDescriptorSetLayout();
+        void initGraphicsPipeline();
+        void initFramebuffers();
+        void initFrameResources();
+        void initVertexBuffers();
 
-        private:
-            Renderer* m_renderer;
+    private:
+        Chicane::Renderer* m_renderer;
 
-            std::unique_ptr<GraphicsPipeline::Instance> m_graphicsPipeline;
+        std::unique_ptr<Chicane::GraphicsPipeline::Instance> m_graphicsPipeline;
 
-            vk::DescriptorSet m_descriptorSet;
-            Descriptor::Bundle m_frameDescriptor;
-            Buffer::Instance m_vertexBuffer;
-        };
-    }
+        vk::DescriptorSet m_descriptorSet;
+        Chicane::Descriptor::Bundle m_frameDescriptor;
+        Chicane::Buffer::Instance m_vertexBuffer;
+    };
 }

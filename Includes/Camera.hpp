@@ -2,13 +2,10 @@
 
 #include "Runtime/Renderer.hpp"
 
-namespace Chicane
+namespace Factory
 {
-    namespace Editor
+    class Camera : public Chicane::Camera
     {
-        class ViewportCamera : public Camera
-        {
-            void onEvent(const SDL_Event& inEvent) override;
-        };
-    }
+        void onEvent(const SDL_Event& inEvent) override;
+    };
 }
