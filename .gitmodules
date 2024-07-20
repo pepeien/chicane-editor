@@ -1,0 +1,3 @@
+[submodule "Vendors/Engine"]
+	path = Vendors/Engine
+	url = https://github.com/pepeien/chicane.git
