@@ -68,8 +68,7 @@ target_include_directories(
     ${EDITOR_TARGET_NAME}
 
     PRIVATE
-        $<BUILD_INTERFACE:${INCLUDES_DIR}>
-        $<INSTALL_INTERFACE:Includes>
+        ${EDITOR_SOURCE_DIR}
 )
 
 target_link_libraries(

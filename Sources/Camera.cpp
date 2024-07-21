@@ -1,7 +1,5 @@
 #include "Camera.hpp"
 
-#include "Runtime/Runtime.hpp"
-
 namespace Factory
 {
     void Camera::onEvent(const SDL_Event& inEvent)

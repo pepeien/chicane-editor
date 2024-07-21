@@ -1,9 +1,5 @@
 #include "Editor.hpp"
 
-#include <filesystem>
-
-#include "Runtime/Grid.hpp"
-
 #include "Camera.hpp"
 #include "View.hpp"
 #include "Layer.hpp"

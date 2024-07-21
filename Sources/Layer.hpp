@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Runtime/Core.hpp"
-#include "Runtime/Runtime.hpp"
-#include "Runtime/Renderer.hpp"
+#include "Base.hpp"
 
 namespace Factory
 {
