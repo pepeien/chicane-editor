@@ -174,8 +174,8 @@ namespace Factory
         createInfo.hasVertices          = false;
         createInfo.hasDepth             = true;
         createInfo.logicalDevice        = m_renderer->m_logicalDevice;
-        createInfo.vertexShaderPath     = "Assets/Shaders/grid.vert.spv";
-        createInfo.fragmentShaderPath   = "Assets/Shaders/grid.frag.spv";
+        createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
+        createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
         createInfo.swapChainExtent      = m_renderer->m_swapChain.extent;
         createInfo.swapChainImageFormat = m_renderer->m_swapChain.format;
         createInfo.depthFormat          = m_renderer->m_swapChain.images[0].depthFormat;
@@ -234,14 +234,14 @@ namespace Factory
             );
             frame.addDescriptorSet(m_id, sceneDescriptorSet);
 
-            vk::WriteDescriptorSet cameraMatrixWriteInfo;
-            cameraMatrixWriteInfo.dstSet          = sceneDescriptorSet;
-            cameraMatrixWriteInfo.dstBinding      = 0;
-            cameraMatrixWriteInfo.dstArrayElement = 0;
-            cameraMatrixWriteInfo.descriptorCount = 1;
-            cameraMatrixWriteInfo.descriptorType  = vk::DescriptorType::eUniformBuffer;
-            cameraMatrixWriteInfo.pBufferInfo     = &frame.cameraMatrixDescriptorBufferInfo;
-            frame.addWriteDescriptorSet(cameraMatrixWriteInfo);
+            vk::WriteDescriptorSet cameraWriteInfo;
+            cameraWriteInfo.dstSet          = sceneDescriptorSet;
+            cameraWriteInfo.dstBinding      = 0;
+            cameraWriteInfo.dstArrayElement = 0;
+            cameraWriteInfo.descriptorCount = 1;
+            cameraWriteInfo.descriptorType  = vk::DescriptorType::eUniformBuffer;
+            cameraWriteInfo.pBufferInfo     = &frame.cameraDescriptorBufferInfo;
+            frame.addWriteDescriptorSet(cameraWriteInfo);
         }
     }
 

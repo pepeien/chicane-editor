@@ -13,7 +13,7 @@ list(
         SOURCES
     EXCLUDE
     REGEX
-        ".*CMakeLists.txt$"
+        ".:*CMakeLists.txt|.frag|.vert$"
 )
 
 ##############  Copy files  #######################
@@ -42,3 +42,13 @@ foreach(ITEM ${SOURCES})
                 ${ITEM_FILE}
     )
 endforeach(ITEM)
+
+##############  Set values  #######################
+set(CONTENT_SHADERS_TARGET_NAME "${CONTENT_TARGET_NAME}_Shaders")
+set(CONTENT_SHADERS_SOURCE_DIR  "${CONTENT_SOURCE_DIR}/Shaders")
+
+##############  Add subdirectories  #######################
+add_subdirectory(Shaders)
+
+##############  Add dependencies  #######################
+add_dependencies(${CONTENT_TARGET_NAME} ${CONTENT_SHADERS_TARGET_NAME})
