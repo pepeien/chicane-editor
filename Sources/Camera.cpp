@@ -12,7 +12,7 @@ namespace Factory
         switch (inEvent.motion.state)
         {
         case SDL_BUTTON_LMASK:
-            rotateTo(
+            rotate(
                 glm::vec2(
                     inEvent.motion.xrel,
                     inEvent.motion.yrel
@@ -21,12 +21,12 @@ namespace Factory
 
             break;
         case SDL_BUTTON_MMASK:
-            zoomTo(inEvent.motion.yrel);
+            zoom(inEvent.motion.yrel);
 
             break;
 
         case SDL_BUTTON_RMASK:
-            panTo(
+            pan(
                 glm::vec2(
                     inEvent.motion.xrel,
                     inEvent.motion.yrel
