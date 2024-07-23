@@ -19,7 +19,7 @@ vec4 grid(vec3 position, float scale, bool hasAxis) {
     float minimumz = min(derivative.y, 1.0);
     float minimumx = min(derivative.x, 1.0);
 
-    vec4 color = vec4(0.3);
+    vec4 color = vec4(0.34);
     color.a    = 1.0 - min(line, 1.0);
 
     if (!hasAxis) {
@@ -27,46 +27,50 @@ vec4 grid(vec3 position, float scale, bool hasAxis) {
     }
 
     if ((-1.0 * minimumx) < position.x && position.x < (0.1 * minimumx)) {
-        color.rgb = vec3(1.0, 0.0, 0.0);
+        color.rgb = vec3(0.28);
     }
 
     if ((-1.0 * minimumz) < position.z && position.z < (0.1 * minimumz)) {
-        color.rgb = vec3(0.0, 1.0, 0.0);
+        color.rgb = vec3(0.28);
     }
 
     return color;
 }
 
-float computeDepth(vec3 position) {
-    vec4 result = inProjection * inView * vec4(position, 1.0);
-
-    return result.z / result.w;
+float computeDepth(vec4 clipSpace) {
+    return clipSpace.z / clipSpace.w;
 }
 
-float computeLinearDepth(float depth) {
-    float clip_space_depth = depth * 2.0 - 1.0;
-    float linearDepth      = (2.0 * inNear * inFar) / (inFar + inNear - clip_space_depth * (inFar - inNear));
+float computeLinearDepth(vec4 clipSpace) {
+    float clippedDepth = (clipSpace.z / clipSpace.w) * 2.0 - 1.0;
+    float linearDepth  = (2.0 * inNear * inFar) / (inFar + inNear - clippedDepth * (inFar - inNear));
+
+    return linearDepth / inFar;
+}
+
+float computeFade(vec4 clipSpace) {
+    float linearDepth = computeLinearDepth(clipSpace);
 
     return linearDepth / inFar;
 }
 
 void main() {
-    float t = -inNearPoint.y / (inFarPoint.y - inNearPoint.y);
+    float floorDistance = -inNearPoint.y / (inFarPoint.y - inNearPoint.y);
+    bool isFloor = floorDistance > 0;
 
-    vec3 position = inNearPoint + (t * (inFarPoint - inNearPoint));
+    vec3 position  = inNearPoint + (floorDistance * (inFarPoint - inNearPoint));
+    vec4 clipSpace = inProjection * inView * vec4(position, 1.0);
 
-    float depth       = computeDepth(position);
-    float linearDepth = computeLinearDepth(depth);
-    float fade        = max(0.1, 0.25 - linearDepth);
+    outColor  = grid(position, 1, true);
+    outColor *= smoothstep(0.04, 0.0, computeFade(clipSpace));
 
-    gl_FragDepth = depth;
+    if (!isFloor) {
+        outColor *= 0.0;
+    }
 
-    outColor = grid(position, 1, true);
-    outColor *= float(t > 0);
-    outColor *= fade;
+    gl_FragDepth = computeDepth(clipSpace);
 
-    if(outColor.a == 0.0)
-    {
+    if (outColor.a <= 0.0) {
         discard;
     }
 }

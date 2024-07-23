@@ -24,12 +24,12 @@ namespace Factory
         windowCreateInfo.resolution.x  = 1600;
         windowCreateInfo.resolution.y  = 900;
         windowCreateInfo.type          = Chicane::WindowType::Windowed;
-        windowCreateInfo.displayIndex  = 0;
+        windowCreateInfo.displayIndex  = 1;
 
         std::unique_ptr<Chicane::Window> window = std::make_unique<Chicane::Window>(windowCreateInfo);
         window->addLayer(
             new Layer(window.get()),
-            Chicane::LayerPushTecnique::BeforeLayer,
+            Chicane::Layer::Push::BeforeLayer,
             "Level"
         );
         window->run();

@@ -13,15 +13,13 @@ project(${NAME} VERSION 0.0.1)
 ##############  Set values  #######################
 set(BUILD_DIR "${CMAKE_CURRENT_LIST_DIR}/Bin/${CMAKE_SYSTEM_NAME}")
 
-set(CONTENT_DIR  "${CMAKE_CURRENT_LIST_DIR}/Content")
-set(INCLUDES_DIR "${CMAKE_CURRENT_LIST_DIR}/Includes")
-set(SOURCES_DIR  "${CMAKE_CURRENT_LIST_DIR}/Sources")
+set(CONTENT_DIR "${CMAKE_CURRENT_LIST_DIR}/Content")
 
 set(CONTENT_TARGET_NAME "${NAME}_Content")
 set(CONTENT_SOURCE_DIR  "${CONTENT_DIR}")
 
 set(EDITOR_TARGET_NAME "${NAME}_Editor")
-set(EDITOR_SOURCE_DIR  "${SOURCES_DIR}")
+set(EDITOR_SOURCE_DIR  "${CMAKE_CURRENT_LIST_DIR}/Source")
 
 ##############  Set source files  #######################
 file(
