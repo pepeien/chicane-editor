@@ -10,7 +10,7 @@ layout(location = 4) in mat4 inView;
 layout(location = 8) in mat4 inProjection;
 
 vec4 grid(vec3 position, float scale, bool hasAxis) {
-    vec2 coord      = position.xz * scale;
+    vec2 coord      = position.xy * scale;
     vec2 derivative = fwidth(coord);
     vec2 uv         = fract(coord - 0.5) - 0.5;
     vec2 grid       = abs(uv) / derivative;
@@ -30,7 +30,7 @@ vec4 grid(vec3 position, float scale, bool hasAxis) {
         color.rgb = vec3(0.28);
     }
 
-    if ((-1.0 * minimumz) < position.z && position.z < (0.1 * minimumz)) {
+    if ((-1.0 * minimumz) < position.y && position.y < (0.1 * minimumz)) {
         color.rgb = vec3(0.28);
     }
 
@@ -55,8 +55,7 @@ float computeFade(vec4 clipSpace) {
 }
 
 void main() {
-    float floorDistance = -inNearPoint.y / (inFarPoint.y - inNearPoint.y);
-    bool isFloor = floorDistance > 0;
+    float floorDistance = -inNearPoint.z / (inFarPoint.z - inNearPoint.z);
 
     vec3 position  = inNearPoint + (floorDistance * (inFarPoint - inNearPoint));
     vec4 clipSpace = inProjection * inView * vec4(position, 1.0);
@@ -64,13 +63,9 @@ void main() {
     outColor  = grid(position, 1, true);
     outColor *= smoothstep(0.04, 0.0, computeFade(clipSpace));
 
-    if (!isFloor) {
-        outColor *= 0.0;
-    }
-
     gl_FragDepth = computeDepth(clipSpace);
 
-    if (outColor.a <= 0.0) {
+    if (floorDistance < 0 || outColor.a <= 0.0) {
         discard;
     }
 }

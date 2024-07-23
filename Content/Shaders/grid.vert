@@ -17,13 +17,13 @@ layout(location = 3) out vec3 outFarPoint;
 layout(location = 4) out mat4 outView;
 layout(location = 8) out mat4 outProjection;
 
-vec2 points[6] = vec2[] (
-    vec2( 1.0,  1.0),
-    vec2(-1.0, -1.0),
-    vec2(-1.0,  1.0),
-    vec2(-1.0, -1.0),
-    vec2( 1.0,  1.0),
-    vec2( 1.0, -1.0)
+const vec3 positions[6] = vec3[](
+	vec3( 1.0,  1.0, 0.0),
+	vec3(-1.0, -1.0, 0.0),
+	vec3(-1.0,  1.0, 0.0),
+	vec3(-1.0, -1.0, 0.0),
+	vec3( 1.0,  1.0, 0.0),
+	vec3( 1.0, -1.0, 0.0)
 );
 
 vec3 unprojectPoint(float x, float y, float z) {
@@ -33,7 +33,7 @@ vec3 unprojectPoint(float x, float y, float z) {
 }
 
 void main() {
-    vec3 point = vec3(points[gl_VertexIndex], 0.0);
+    vec3 point = positions[gl_VertexIndex];
 
     // Values
     outNear = 0.01;
@@ -45,7 +45,7 @@ void main() {
         point.y,
         -1.0
     ).xyz;
-    outFarPoint  = unprojectPoint(
+    outFarPoint = unprojectPoint(
         point.x,
         point.y,
         1.0
