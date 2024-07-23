@@ -24,7 +24,7 @@ namespace Factory
         windowCreateInfo.resolution.x  = 1600;
         windowCreateInfo.resolution.y  = 900;
         windowCreateInfo.type          = Chicane::WindowType::Windowed;
-        windowCreateInfo.displayIndex  = 1;
+        windowCreateInfo.displayIndex  = 0;
 
         std::unique_ptr<Chicane::Window> window = std::make_unique<Chicane::Window>(windowCreateInfo);
         window->addLayer(
