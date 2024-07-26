@@ -7,21 +7,17 @@ namespace Factory
             "home",
             "Content/View/Home.grid"
         ),
-        m_cubemapFileFormat({}),
-        m_cubemapInfo({}),
         m_name(std::make_any<std::string>("")),
-        m_frontImage(std::make_any<std::string>("")),
-        m_behindImage(std::make_any<std::string>("")),
-        m_leftImage(std::make_any<std::string>("")),
-        m_rightImage(std::make_any<std::string>("")),
-        m_upImage(std::make_any<std::string>("")),
-        m_downImage(std::make_any<std::string>(""))
+        m_imagePath(std::make_any<std::string>(""))
     {
-        m_cubemapFileFormat.title     = "TGA";
-        m_cubemapFileFormat.extension = "tga";
-
-        m_cubemapInfo.type = Chicane::Box::Type::CubeMap;
-        m_cubemapInfo.entries.resize(6);
+        addVariable(
+            "name",
+            &m_name
+        );
+        addVariable(
+            "imagePath",
+            &m_imagePath
+        );
 
         addFunction(
             "getFPS",
@@ -31,183 +27,39 @@ namespace Factory
             "getFrametime",
             std::bind(&View::getFrametime, this, std::placeholders::_1)
         );
-
-        // Form
         addFunction(
-            "addFrontImage",
-            std::bind(&View::addFrontImage, this, std::placeholders::_1)
-        );
-        addFunction(
-            "addBehindImage",
-            std::bind(&View::addBehindImage, this, std::placeholders::_1)
-        );
-        addFunction(
-            "addLeftImage",
-            std::bind(&View::addLeftImage, this, std::placeholders::_1)
-        );
-        addFunction(
-            "addRightImage",
-            std::bind(&View::addRightImage, this, std::placeholders::_1)
-        );
-        addFunction(
-            "addUpImage",
-            std::bind(&View::addUpImage, this, std::placeholders::_1)
-        );
-        addFunction(
-            "addDownImage",
-            std::bind(&View::addDownImage, this, std::placeholders::_1)
+            "onSelectImage",
+            std::bind(&View::onSelectImage, this, std::placeholders::_1)
         );
         addFunction(
             "onSubmit",
             std::bind(&View::onSubmit, this, std::placeholders::_1)
         );
-
-        addVariable(
-            "name",
-            &m_name
-        );
-        addVariable(
-            "frontImage",
-            &m_frontImage
-        );
-        addVariable(
-            "behindImage",
-            &m_behindImage
-        );
-        addVariable(
-            "leftImage",
-            &m_leftImage
-        );
-        addVariable(
-            "rightImage",
-            &m_rightImage
-        );
-        addVariable(
-            "upImage",
-            &m_upImage
-        );
-        addVariable(
-            "downImage",
-            &m_downImage
-        );
     }
 
-    std::uint64_t View::getFPS(Chicane::Grid::ComponentEvent inEvent)
+    std::uint32_t View::getFPS(Chicane::Grid::ComponentEvent inEvent)
     {
-        return Chicane::State::getTelemetry().framerate;
+        return Chicane::State::getTelemetry().frame.rate;
     }
 
     std::string View::getFrametime(Chicane::Grid::ComponentEvent inEvent)
     {
-        std::string frametime = std::to_string(Chicane::State::getTelemetry().time);
+        std::string frametime = std::to_string(Chicane::State::getTelemetry().frame.time);
 
         return std::string(frametime.begin(), frametime.end() - 5);
     }
 
-    int View::addFrontImage(Chicane::Grid::ComponentEvent inEvent)
+    int View::onSelectImage(Chicane::Grid::ComponentEvent inEvent)
     {
         Chicane::FileSystem::FileResult result = Chicane::FileSystem::openFileDialog(
-            "Choose Front Image",
-            { m_cubemapFileFormat }
+            "Select Image",
+            {
+                { "PNG", "png" },
+                { "TGA", "tga" }
+            }
         );
 
-        Chicane::Box::WriteEntry entry = {};
-        entry.type     = Chicane::Box::EntryType::Texture;
-        entry.filePath = result.path;
-
-        m_frontImage = result.path;
-
-        m_cubemapInfo.entries[0] = entry;
-
-        return 0; 
-    }
-
-    int View::addBehindImage(Chicane::Grid::ComponentEvent inEvent)
-    {
-        Chicane::FileSystem::FileResult result = Chicane::FileSystem::openFileDialog(
-            "Choose Behind Image",
-            { m_cubemapFileFormat }
-        );
-
-        Chicane::Box::WriteEntry entry = {};
-        entry.type     = Chicane::Box::EntryType::Texture;
-        entry.filePath = result.path;
-
-        m_behindImage = result.path;
-
-        m_cubemapInfo.entries[1] = entry;
-
-        return 0;
-    }
-
-    int View::addLeftImage(Chicane::Grid::ComponentEvent inEvent)
-    {
-        Chicane::FileSystem::FileResult result = Chicane::FileSystem::openFileDialog(
-            "Choose Left Image",
-            { m_cubemapFileFormat }
-        );
-
-        Chicane::Box::WriteEntry entry = {};
-        entry.type     = Chicane::Box::EntryType::Texture;
-        entry.filePath = result.path;
-
-        m_leftImage = result.path;
-
-        m_cubemapInfo.entries[2] = entry;
-
-        return 0;
-    }
-
-    int View::addRightImage(Chicane::Grid::ComponentEvent inEvent)
-    {
-        Chicane::FileSystem::FileResult result = Chicane::FileSystem::openFileDialog(
-            "Choose Right Image",
-            { m_cubemapFileFormat }
-        );
-
-        Chicane::Box::WriteEntry entry = {};
-        entry.type     = Chicane::Box::EntryType::Texture;
-        entry.filePath = result.path;
-
-        m_rightImage = result.path;
-
-        m_cubemapInfo.entries[3] = entry;
-
-        return 0;
-    }
-
-    int View::addUpImage(Chicane::Grid::ComponentEvent inEvent)
-    {
-        Chicane::FileSystem::FileResult result = Chicane::FileSystem::openFileDialog(
-            "Choose Up Image",
-            { m_cubemapFileFormat }
-        );
-
-        Chicane::Box::WriteEntry entry = {};
-        entry.type     = Chicane::Box::EntryType::Texture;
-        entry.filePath = result.path;
-
-        m_upImage = result.path;
-
-        m_cubemapInfo.entries[4] = entry;
-
-        return 0;
-    }
-
-    int View::addDownImage(Chicane::Grid::ComponentEvent inEvent)
-    {
-        Chicane::FileSystem::FileResult result = Chicane::FileSystem::openFileDialog(
-            "Choose Down Image",
-            { m_cubemapFileFormat }
-        );
-
-        Chicane::Box::WriteEntry entry = {};
-        entry.type     = Chicane::Box::EntryType::Texture;
-        entry.filePath = result.path;
-
-        m_downImage = result.path;
-
-        m_cubemapInfo.entries[5] = entry;
+        m_imagePath = result.path;
 
         return 0;
     }
@@ -216,13 +68,18 @@ namespace Factory
     {
         Chicane::FileSystem::DirectoryResult result = Chicane::FileSystem::openDirectoryDialog();
 
-        m_cubemapInfo.name       = std::any_cast<std::string>(m_name);
-        m_cubemapInfo.type       = Chicane::Box::Type::CubeMap;
-        m_cubemapInfo.outputPath = result.path;
+        Chicane::Box::WriteInfo info = {};
+        info.name       = std::any_cast<std::string>(m_name);
+        info.outputPath = result.path;
+        info.type       = Chicane::Box::Type::Texture;
 
-        Chicane::Box::write(
-            m_cubemapInfo
-        );
+        Chicane::Box::WriteEntry entry = {};
+        entry.type = Chicane::Box::EntryType::Texture;
+        entry.dataFilePath = std::any_cast<std::string>(m_imagePath);
+
+        info.entries.push_back(entry);
+
+        Chicane::Box::write(info);
 
         return 0;
     }

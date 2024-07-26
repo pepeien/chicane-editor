@@ -1,35 +1,15 @@
 <View id="home">
     <Text>{{ getFPS() }} FPS {{ getFrametime() }} ms</Text>
     <List
-        id="form"
-        direction="column"
-        height="40vh"
+        id="textureForm"
         width="100vw"
+        height="80vh"
+        direction="column"
     >
-        <TextInput
-            label="Skybox Name"
-            value="name"
-        >
-        </TextInput>
-
-        <Button onClick="addFrontImage()" width="20vh">Add Front Image</Button>
-        <Text>{{ frontImage }}</Text>
-
-        <Button onClick="addBehindImage()" width="20vh">Add Behind Image</Button>
-        <Text>{{ behindImage }}</Text>
-
-        <Button onClick="addLeftImage()" width="20vh">Add Left Image</Button>
-        <Text>{{ leftImage }}</Text>
-
-        <Button onClick="addRightImage()" width="20vh">Add Right Image</Button>
-        <Text>{{ rightImage }}</Text>
-
-        <Button onClick="addUpImage()" width="20vh">Add Up Image</Button>
-        <Text>{{ upImage }}</Text>
-
-        <Button onClick="addDownImage()" width="20vh">Add Down Image</Button>
-        <Text>{{ downImage }}</Text>
-
-        <Button onClick="onSubmit()" width="20vh">Submit</Button>
+        <Text>Texture Name</Text>
+        <TextInput value="name"></TextInput>
+        <Button onClick="onSelectImage">Select Image</Button>
+        <Text>{{ imagePath }}</Text>
+        <Button onClick="onSubmit">Create</Button>
     </List>
 </View>
