@@ -61,7 +61,7 @@ void main() {
     vec4 clipSpace = inProjection * inView * vec4(position, 1.0);
 
     outColor  = grid(position, 1, true);
-    outColor *= smoothstep(0.04, 0.0, computeFade(clipSpace));
+    outColor *= smoothstep(0.08, 0.0, computeFade(clipSpace));
 
     gl_FragDepth = computeDepth(clipSpace);
 
