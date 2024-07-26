@@ -5,8 +5,8 @@ namespace Factory
     Camera::Camera()
         : Chicane::Camera()
     {
-        setPosition(200.0f, 0.0f, 0.0f);
-        setRotation(120.0f, 0.0f, 0.0f);
+        setPosition(400.0f, 0.0f, 0.0f);
+        setRotation(180.0f, 0.0f, 0.0f);
     }
 
     void Camera::onEvent(const SDL_Event& inEvent)
