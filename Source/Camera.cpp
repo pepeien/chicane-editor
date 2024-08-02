@@ -20,7 +20,7 @@ namespace Factory
         {
         case SDL_BUTTON_LMASK:
             addPitch(inEvent.motion.yrel);
-            addYaw(inEvent.motion.xrel);
+            addYaw(-inEvent.motion.xrel);
 
             break;
         case SDL_BUTTON_MMASK:
