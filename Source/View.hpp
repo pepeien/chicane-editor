@@ -10,13 +10,21 @@ namespace Factory
         View();
 
     private:
-        std::uint32_t getFPS(Chicane::Grid::ComponentEvent inEvent);
-        std::string getFrametime(Chicane::Grid::ComponentEvent inEvent);
-        int onSelectImage(Chicane::Grid::ComponentEvent inEvent);
-        int onSubmit(Chicane::Grid::ComponentEvent inEvent);
+        std::uint32_t getFPS(const Chicane::Grid::ComponentEvent& inEvent);
+        std::string getFrametime(const Chicane::Grid::ComponentEvent& inEvent);
+        int showDirectoryHistory(const Chicane::Grid::ComponentEvent& inEvent);
+        int showDirectory(const Chicane::Grid::ComponentEvent& inEvent);
 
     private:
-        std::any m_name;
-        std::any m_imagePath;
+        void updateDirHistory();
+        void listDir(const std::string& inPath);
+
+    private:
+        // Render
+        std::any m_directoryHistory;
+        std::any m_directoryInfo;
+
+        // Internal
+        std::string m_currentDirectory;
     };
 }

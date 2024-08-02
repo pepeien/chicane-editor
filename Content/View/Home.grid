@@ -1,15 +1,21 @@
-<View id="home">
-    <Text>{{ getFPS() }} FPS {{ getFrametime() }} ms</Text>
-    <List
-        id="textureForm"
-        width="100vw"
-        height="80vh"
-        direction="column"
-    >
-        <Text>Texture Name</Text>
-        <TextInput value="name"></TextInput>
-        <Button onClick="onSelectImage">Select Image</Button>
-        <Text>{{ imagePath }}</Text>
-        <Button onClick="onSubmit">Create</Button>
+<View id="home" style="Content/View/Home.decal">
+    <List id="sideBar" direction="column">
+    </List>
+    <List id="bottomBar" direction="column">
+        <List
+            id="dirHistory"
+            direction="row"
+            items="directoryHistory"
+            item-getter="showDirectoryHistory"
+        >
+        </List>
+        <Grid
+            id="dirContent"
+            item-width="15vw"
+            item-height="49px"
+            items="directoryInfo"
+            item-getter="showDirectory"
+        >
+        </Grid>
     </List>
 </View>

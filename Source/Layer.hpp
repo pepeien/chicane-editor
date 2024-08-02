@@ -28,6 +28,8 @@ namespace Factory
         void initFrameResources();
         void initVertexBuffers();
 
+        void setViewport();
+
     private:
         Chicane::Renderer* m_renderer;
 

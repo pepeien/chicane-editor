@@ -1,0 +1,30 @@
+#sideBar {
+    position: absolute;
+    width: 18vw;
+    height: 100vh;
+    margin-left: 82vw;
+    background-color: #333333;
+}
+
+#bottomBar {
+    position: absolute;
+    width: 82vw;
+    height: 20vh;
+    margin-top: 80vh;
+    background-color: #333333;
+}
+
+#dirHistory {
+    width: 81vw;
+    height: 3vh;
+    margin-top: 2vh;
+    margin-left: 2vw;
+}
+
+#dirContent {
+    width: 78vw;
+    height: 11vh;
+    background-color: #525252;
+    margin-top: 1vh;
+    margin-left: 2vw;
+}

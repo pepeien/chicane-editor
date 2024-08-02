@@ -45,6 +45,8 @@ namespace Factory
         initFramebuffers();
         initFrameResources();
         initVertexBuffers();
+
+        setViewport();
     }
 
     void Layer::destroy()
@@ -70,6 +72,8 @@ namespace Factory
 
         initFramebuffers();
         initFrameResources();
+
+        setViewport();
     }
 
     void Layer::render(
@@ -101,9 +105,6 @@ namespace Factory
             &renderPassBeginInfo,
             vk::SubpassContents::eInline
         );
-
-        // Viewport
-        m_renderer->updateViewport(inCommandBuffer);
 
         // Preparing
         inCommandBuffer.bindPipeline(
@@ -297,6 +298,16 @@ namespace Factory
         Chicane::Buffer::destroy(
             m_renderer->m_logicalDevice,
             stagingBuffer
+        );
+    }
+
+    void Layer::setViewport()
+    {
+        m_renderer->setViewport(
+            vk::Extent2D(
+                Chicane::Grid::getSize("82vw"),
+                Chicane::Grid::getSize("80vh")
+            )
         );
     }
 }
