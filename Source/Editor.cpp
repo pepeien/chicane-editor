@@ -9,12 +9,12 @@ namespace Factory
     void run()
     {
         std::unique_ptr<Camera> camera = std::make_unique<Camera>();
-        Chicane::State::setCamera(camera.get());
+        Chicane::setCamera(camera.get());
 
         Chicane::Allocator::load("Content/Textures/Skybox/Gray.box");
 
         std::unique_ptr<Chicane::Level> level = std::make_unique<Chicane::Level>();
-        Chicane::State::setLevel(level.get());
+        Chicane::setLevel(level.get());
 
         std::unique_ptr<View> view = std::make_unique<View>();
         Chicane::Grid::addView(view.get());
