@@ -1,8 +1,8 @@
 #include "Editor.hpp"
 
 #include "Camera.hpp"
-#include "View.hpp"
 #include "Layer.hpp"
+#include "View.hpp"
 
 namespace Factory
 {

@@ -21,6 +21,14 @@ namespace Factory
         );
 
         addFunction(
+            "getFPS",
+            std::bind(&View::getFPS, this, std::placeholders::_1)
+        );
+        addFunction(
+            "getFrametime",
+            std::bind(&View::getFrametime, this, std::placeholders::_1)
+        );
+        addFunction(
             "showDirectoryHistory",
             std::bind(&View::showDirectoryHistory, this, std::placeholders::_1)
         );
