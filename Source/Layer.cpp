@@ -304,9 +304,9 @@ namespace Factory
     void Layer::setViewport()
     {
         m_renderer->setViewport(
-            vk::Extent2D(
-                Chicane::Grid::getSize("82vw"),
-                Chicane::Grid::getSize("80vh")
+            Chicane::Vec<std::uint32_t>::Two(
+                static_cast<std::uint32_t>(Chicane::Grid::getSize("82vw")),
+                static_cast<std::uint32_t>(Chicane::Grid::getSize("80vh"))
             )
         );
     }

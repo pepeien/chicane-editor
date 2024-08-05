@@ -22,6 +22,7 @@ namespace Factory
 
         Chicane::WindowCreateInfo windowCreateInfo = {};
         windowCreateInfo.title         = "Factory Editor";
+        windowCreateInfo.icon          = "Content/Icon.png";
         windowCreateInfo.resolution.x  = 1600;
         windowCreateInfo.resolution.y  = 900;
         windowCreateInfo.type          = Chicane::WindowType::Windowed;
