@@ -10,8 +10,12 @@ set(NAME "Factory")
 
 project(${NAME} VERSION 0.0.1)
 
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 ##############  Set values  #######################
-set(BUILD_DIR "${CMAKE_CURRENT_LIST_DIR}/Bin/${CMAKE_SYSTEM_NAME}")
+set(BUILD_DIR "${CMAKE_CURRENT_LIST_DIR}/Bin/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}")
 
 set(CONTENT_DIR "${CMAKE_CURRENT_LIST_DIR}/Content")
 
@@ -50,9 +54,6 @@ set_target_properties(
     "Factory"
 
     VS_DEBUGGER_WORKING_DIRECTORY
-    "${BUILD_DIR}"
-
-    RUNTIME_OUTPUT_DIRECTORY
     "${BUILD_DIR}"
 
     RUNTIME_OUTPUT_DIRECTORY_DEBUG
