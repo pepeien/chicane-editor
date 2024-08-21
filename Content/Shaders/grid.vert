@@ -1,6 +1,8 @@
 #version 450
 
 layout(set = 0, binding = 0) uniform CameraUBO {
+    vec4 clip;
+
     mat4 view;
     mat4 projection;
     mat4 viewProjection;
@@ -14,8 +16,7 @@ layout(location = 0) out float outNear;
 layout(location = 1) out float outFar;
 layout(location = 2) out vec3 outNearPoint;
 layout(location = 3) out vec3 outFarPoint;
-layout(location = 4) out mat4 outView;
-layout(location = 8) out mat4 outProjection;
+layout(location = 4) out mat4 outViewProjection;
 
 const vec3 positions[6] = vec3[](
 	vec3( 1.0,  1.0, 0.0),
@@ -36,8 +37,8 @@ void main() {
     vec3 point = positions[gl_VertexIndex];
 
     // Values
-    outNear = 0.01;
-    outFar  = 100.0;
+    outNear = camera.clip.x;
+    outFar  = camera.clip.y;
 
     // Points
     outNearPoint = unprojectPoint(
@@ -52,8 +53,7 @@ void main() {
     ).xyz;
 
     // Camera
-    outView       = camera.view;
-    outProjection = camera.projection;
+    outViewProjection = camera.viewProjection;
 
     gl_Position = vec4(point, 1.0);
 }

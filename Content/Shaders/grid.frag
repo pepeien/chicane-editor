@@ -6,8 +6,7 @@ layout(location = 0) in float inNear;
 layout(location = 1) in float inFar;
 layout(location = 2) in vec3 inNearPoint;
 layout(location = 3) in vec3 inFarPoint;
-layout(location = 4) in mat4 inView;
-layout(location = 8) in mat4 inProjection;
+layout(location = 4) in mat4 inViewProjection;
 
 vec4 grid(vec3 position, float scale, bool hasAxis) {
     vec2 coord      = position.xy * scale;
@@ -58,7 +57,7 @@ void main() {
     float floorDistance = -inNearPoint.z / (inFarPoint.z - inNearPoint.z);
 
     vec3 position  = inNearPoint + (floorDistance * (inFarPoint - inNearPoint));
-    vec4 clipSpace = inProjection * inView * vec4(position, 1.0);
+    vec4 clipSpace = inViewProjection * vec4(position, 1.0);
 
     outColor  = grid(position, 1, true);
     outColor *= smoothstep(0.08, 0.0, computeFade(clipSpace));
