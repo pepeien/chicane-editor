@@ -2,6 +2,10 @@
 
 namespace Factory
 {
+    Actor::Actor()
+        : Chicane::Actor()
+    {}
+
     View::View()
         : Chicane::Grid::View(
             "home",

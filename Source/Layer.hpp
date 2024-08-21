@@ -31,7 +31,7 @@ namespace Factory
         void setViewport();
 
     private:
-        Chicane::Renderer* m_renderer;
+        Chicane::Renderer::Internals m_rendererInternals;
 
         std::unique_ptr<Chicane::GraphicsPipeline::Instance> m_graphicsPipeline;
 

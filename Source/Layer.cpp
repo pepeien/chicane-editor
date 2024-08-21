@@ -4,7 +4,7 @@ namespace Factory
 {
     Layer::Layer(Chicane::Window* inWindow)
         : Chicane::Layer("Editor"),
-        m_renderer(inWindow->getRenderer())
+        m_rendererInternals(inWindow->getRendererInternals())
     {
         m_isInitialized = true;
     }
@@ -16,19 +16,19 @@ namespace Factory
             return;
         }
 
-        m_renderer->m_logicalDevice.waitIdle();
+        m_rendererInternals.logicalDevice.waitIdle();
 
         // Graphics Pipeline
         m_graphicsPipeline.reset();
 
         // Descriptors
-        m_renderer->m_logicalDevice.destroyDescriptorSetLayout(
+        m_rendererInternals.logicalDevice.destroyDescriptorSetLayout(
             m_frameDescriptor.setLayout
         );
 
         // Buffers
         Chicane::Buffer::destroy(
-            m_renderer->m_logicalDevice,
+            m_rendererInternals.logicalDevice,
             m_vertexBuffer
         );
     }
@@ -56,9 +56,9 @@ namespace Factory
             return;
         }
 
-        m_renderer->m_logicalDevice.waitIdle();
+        m_rendererInternals.logicalDevice.waitIdle();
 
-        m_renderer->m_logicalDevice.destroyDescriptorPool(
+        m_rendererInternals.logicalDevice.destroyDescriptorPool(
             m_frameDescriptor.pool
         );
     }
@@ -158,7 +158,7 @@ namespace Factory
 
         Chicane::Descriptor::initSetLayout(
             m_frameDescriptor.setLayout,
-            m_renderer->m_logicalDevice,
+            m_rendererInternals.logicalDevice,
             frameLayoutBidings
         );
     }
@@ -172,14 +172,14 @@ namespace Factory
 
         Chicane::GraphicsPipeline::CreateInfo createInfo = {};
         createInfo.canOverwrite         = false;
-        createInfo.hasVertices          = false;
+        createInfo.hasVertices          = true;
         createInfo.hasDepth             = true;
-        createInfo.logicalDevice        = m_renderer->m_logicalDevice;
+        createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
         createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
         createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
-        createInfo.swapChainExtent      = m_renderer->m_swapChain.extent;
-        createInfo.swapChainImageFormat = m_renderer->m_swapChain.format;
-        createInfo.depthFormat          = m_renderer->m_swapChain.images[0].depthFormat;
+        createInfo.swapChainExtent      = m_rendererInternals.swapchain->extent;
+        createInfo.swapChainImageFormat = m_rendererInternals.swapchain->format;
+        createInfo.depthFormat          = m_rendererInternals.swapchain->depthFormat;
         createInfo.descriptorSetLayouts = { m_frameDescriptor.setLayout };
 
         m_graphicsPipeline = std::make_unique<Chicane::GraphicsPipeline::Instance>(createInfo);
@@ -192,15 +192,15 @@ namespace Factory
             return;
         }
 
-        for (Chicane::Frame::Instance& frame : m_renderer->m_swapChain.images)
+        for (Chicane::Frame::Instance& frame : m_rendererInternals.swapchain->images)
         {
             Chicane::Frame::Buffer::CreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.id              = m_id;
-            framebufferCreateInfo.logicalDevice   = m_renderer->m_logicalDevice;
+            framebufferCreateInfo.logicalDevice   = m_rendererInternals.logicalDevice;
             framebufferCreateInfo.renderPass      = m_graphicsPipeline->renderPass;
-            framebufferCreateInfo.swapChainExtent = m_renderer->m_swapChain.extent;
+            framebufferCreateInfo.swapChainExtent = m_rendererInternals.swapchain->extent;
             framebufferCreateInfo.attachments.push_back(frame.imageView);
-            framebufferCreateInfo.attachments.push_back(frame.depthImageView);
+            framebufferCreateInfo.attachments.push_back(frame.depth.imageView);
 
             Chicane::Frame::Buffer::init(frame, framebufferCreateInfo);
         }
@@ -214,22 +214,22 @@ namespace Factory
         }
 
         Chicane::Descriptor::PoolCreateInfo descriptorPoolCreateInfo;
-        descriptorPoolCreateInfo.size  = static_cast<uint32_t>(m_renderer->m_swapChain.images.size());
+        descriptorPoolCreateInfo.size  = static_cast<uint32_t>(m_rendererInternals.swapchain->images.size());
         descriptorPoolCreateInfo.types.push_back(vk::DescriptorType::eUniformBuffer);
 
         Chicane::Descriptor::initPool(
             m_frameDescriptor.pool,
-            m_renderer->m_logicalDevice,
+            m_rendererInternals.logicalDevice,
             descriptorPoolCreateInfo
         );
 
-        for (Chicane::Frame::Instance& frame : m_renderer->m_swapChain.images)
+        for (Chicane::Frame::Instance& frame : m_rendererInternals.swapchain->images)
         {
             // Scene
             vk::DescriptorSet sceneDescriptorSet;
             Chicane::Descriptor::initSet(
                 sceneDescriptorSet,
-                m_renderer->m_logicalDevice,
+                m_rendererInternals.logicalDevice,
                 m_frameDescriptor.setLayout,
                 m_frameDescriptor.pool
             );
@@ -249,14 +249,14 @@ namespace Factory
     void Layer::initVertexBuffers()
     {
         std::vector<float> vertices = {
-            -1.0f, -1.0f,
-            1.0f, 1.0f,
-            -1.0f, 1.0f
+            0.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 0.0f
         };
 
         Chicane::Buffer::CreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.physicalDevice   = m_renderer->m_physicalDevice;
-        stagingBufferCreateInfo.logicalDevice    = m_renderer->m_logicalDevice;
+        stagingBufferCreateInfo.physicalDevice   = m_rendererInternals.physicalDevice;
+        stagingBufferCreateInfo.logicalDevice    = m_rendererInternals.logicalDevice;
         stagingBufferCreateInfo.size             = sizeof(float) * vertices.size();
         stagingBufferCreateInfo.usage            = vk::BufferUsageFlagBits::eTransferSrc;
         stagingBufferCreateInfo.memoryProperties = vk::MemoryPropertyFlagBits::eHostVisible |
@@ -265,7 +265,7 @@ namespace Factory
         Chicane::Buffer::Instance stagingBuffer;
         Chicane::Buffer::init(stagingBuffer, stagingBufferCreateInfo);
 
-        void* writeLocation = m_renderer->m_logicalDevice.mapMemory(
+        void* writeLocation = m_rendererInternals.logicalDevice.mapMemory(
             stagingBuffer.memory,
             0,
             stagingBufferCreateInfo.size
@@ -275,11 +275,11 @@ namespace Factory
             vertices.data(),
             stagingBufferCreateInfo.size
         );
-        m_renderer->m_logicalDevice.unmapMemory(stagingBuffer.memory);
+        m_rendererInternals.logicalDevice.unmapMemory(stagingBuffer.memory);
 
         Chicane::Buffer::CreateInfo bufferCreateInfo;
-        bufferCreateInfo.physicalDevice   = m_renderer->m_physicalDevice;
-        bufferCreateInfo.logicalDevice    = m_renderer->m_logicalDevice;;
+        bufferCreateInfo.physicalDevice   = m_rendererInternals.physicalDevice;
+        bufferCreateInfo.logicalDevice    = m_rendererInternals.logicalDevice;;
         bufferCreateInfo.size             = stagingBufferCreateInfo.size;
         bufferCreateInfo.usage            = vk::BufferUsageFlagBits::eTransferDst |
                                             vk::BufferUsageFlagBits::eVertexBuffer;
@@ -291,19 +291,19 @@ namespace Factory
             stagingBuffer,
             m_vertexBuffer,
             bufferCreateInfo.size,
-            m_renderer->m_graphicsQueue,
-            m_renderer->m_mainCommandBuffer
+            m_rendererInternals.graphicsQueue,
+            m_rendererInternals.mainCommandBuffer
         );
 
         Chicane::Buffer::destroy(
-            m_renderer->m_logicalDevice,
+            m_rendererInternals.logicalDevice,
             stagingBuffer
         );
     }
 
     void Layer::setViewport()
     {
-        m_renderer->setViewport(
+        Chicane::setViewport(
             Chicane::Vec<std::uint32_t>::Two(
                 static_cast<std::uint32_t>(Chicane::Grid::getSize("82vw")),
                 static_cast<std::uint32_t>(Chicane::Grid::getSize("80vh"))

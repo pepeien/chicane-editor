@@ -90,6 +90,8 @@
         "semaphore": "cpp",
         "shared_mutex": "cpp",
         "cfenv": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "queue": "cpp",
+        "ranges": "cpp"
     }
 }

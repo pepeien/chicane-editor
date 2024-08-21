@@ -4,6 +4,12 @@
 
 namespace Factory
 {
+    class Actor : public Chicane::Actor
+    {
+    public:
+        Actor();
+    };
+
     class View : public Chicane::Grid::View
     {
     public:

@@ -1,6 +1,5 @@
 #include "Editor.hpp"
 
-#include "Camera.hpp"
 #include "Layer.hpp"
 #include "View.hpp"
 
@@ -8,13 +7,17 @@ namespace Factory
 {
     void run()
     {
-        std::unique_ptr<Camera> camera = std::make_unique<Camera>();
-        Chicane::setCamera(camera.get());
-
         Chicane::Allocator::load("Content/Textures/Skybox/Gray.box");
+
+        std::unique_ptr<Chicane::Controller> controller = std::make_unique<Chicane::Controller>();
+        Chicane::setController(controller.get());
 
         std::unique_ptr<Chicane::Level> level = std::make_unique<Chicane::Level>();
         Chicane::setLevel(level.get());
+
+        Chicane::CameraActor* character = new Chicane::CameraActor();
+        Chicane::addActor(character);
+        Chicane::getController()->attachTo(character);
 
         std::unique_ptr<View> view = std::make_unique<View>();
         Chicane::Grid::addView(view.get());
