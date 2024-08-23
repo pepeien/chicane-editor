@@ -46,7 +46,7 @@ namespace Factory
         initFrameResources();
         initVertexBuffers();
 
-        setViewport();
+        refreshViewport();
     }
 
     void Layer::destroy()
@@ -73,7 +73,7 @@ namespace Factory
         initFramebuffers();
         initFrameResources();
 
-        setViewport();
+        refreshViewport();
     }
 
     void Layer::render(
@@ -301,13 +301,11 @@ namespace Factory
         );
     }
 
-    void Layer::setViewport()
+    void Layer::refreshViewport()
     {
-        Chicane::setViewport(
-            Chicane::Math<std::uint32_t, 2>::Vec(
-                static_cast<std::uint32_t>(Chicane::Grid::getSize("82vw")),
-                static_cast<std::uint32_t>(Chicane::Grid::getSize("80vh"))
-            )
-        );
+        m_viewport.x = static_cast<std::uint32_t>(Chicane::Grid::getSize("82vw"));
+        m_viewport.y = static_cast<std::uint32_t>(Chicane::Grid::getSize("80vh"));
+
+        Chicane::setViewport(m_viewport);
     }
 }

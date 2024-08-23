@@ -11,7 +11,7 @@ namespace Factory
         DefaultActor()
             : Chicane::Actor()
         {
-            setAbsoluteScale(Chicane::Math<float, 3>::Vec(0.15f));
+            setAbsoluteScale(Chicane::Vec<3, float>(0.15f));
 
             m_mesh = Chicane::Allocator::load("Content/Meshes/Aircraft.box");
         }
@@ -42,7 +42,7 @@ namespace Factory
         windowCreateInfo.icon          = "Content/Icon.png";
         windowCreateInfo.resolution.x  = 1600;
         windowCreateInfo.resolution.y  = 900;
-        windowCreateInfo.type          = Chicane::WindowType::Windowed;
+        windowCreateInfo.type          = Chicane::WindowType::Fullscreen;
         windowCreateInfo.displayIndex  = 0;
 
         std::unique_ptr<Chicane::Window> window = std::make_unique<Chicane::Window>(windowCreateInfo);

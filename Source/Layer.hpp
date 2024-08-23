@@ -28,7 +28,7 @@ namespace Factory
         void initFrameResources();
         void initVertexBuffers();
 
-        void setViewport();
+        void refreshViewport();
 
     private:
         Chicane::Renderer::Internals m_rendererInternals;
@@ -38,5 +38,7 @@ namespace Factory
         vk::DescriptorSet m_descriptorSet;
         Chicane::Descriptor::Bundle m_frameDescriptor;
         Chicane::Buffer::Instance m_vertexBuffer;
+
+        Chicane::Vec<2, std::uint32_t> m_viewport;
     };
 }
