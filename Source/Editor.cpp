@@ -11,7 +11,7 @@ namespace Factory
         DefaultActor()
             : Chicane::Actor()
         {
-            setAbsoluteScale(Chicane::Vec<float>::Three(0.15f));
+            setAbsoluteScale(Chicane::Math<float, 3>::Vec(0.15f));
 
             m_mesh = Chicane::Allocator::load("Content/Meshes/Aircraft.box");
         }

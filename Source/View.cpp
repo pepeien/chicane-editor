@@ -1,5 +1,7 @@
 #include "View.hpp"
 
+#include "Chicane/Core.hpp"
+
 namespace Factory
 {
     Actor::Actor()

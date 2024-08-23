@@ -93,6 +93,10 @@
         "variant": "cpp",
         "queue": "cpp",
         "ranges": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "stack": "cpp",
+        "*.inc": "cpp",
+        "bitset": "cpp",
+        "xstddef": "cpp"
     }
 }
