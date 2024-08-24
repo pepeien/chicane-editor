@@ -11,9 +11,8 @@ namespace Factory
         DefaultActor()
             : Chicane::Actor()
         {
-            setAbsoluteScale(Chicane::Vec<3, float>(0.15f));
-
-            m_mesh = Chicane::Allocator::load("Content/Meshes/Aircraft.box");
+            setAbsoluteScale(Chicane::Vec<3, float>(0.05f));
+            setMesh(Chicane::Allocator::load("Content/Meshes/Aircraft.box"));
         }
     };
 
@@ -22,14 +21,14 @@ namespace Factory
         Chicane::Allocator::load("Content/Textures/Skybox/Gray.box");
 
         std::unique_ptr<Chicane::Controller> controller = std::make_unique<Chicane::Controller>();
-        Chicane::setController(controller.get());
+        Chicane::setActiveController(controller.get());
 
         std::unique_ptr<Chicane::Level> level = std::make_unique<Chicane::Level>();
-        Chicane::setLevel(level.get());
+        Chicane::setActiveLevel(level.get());
 
         Chicane::CameraActor* character = new Chicane::CameraActor();
         Chicane::addActor(character);
-        Chicane::getController()->attachTo(character);
+        Chicane::getActiveController()->attachTo(character);
 
         Chicane::addActor(new DefaultActor());
 

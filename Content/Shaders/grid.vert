@@ -36,15 +36,11 @@ vec3 unprojectPoint(float x, float y, float z) {
 void main() {
     vec3 point = positions[gl_VertexIndex];
 
-    // Values
-    outNear = camera.clip.x;
-    outFar  = camera.clip.y;
-
     // Points
     outNearPoint = unprojectPoint(
         point.x,
         point.y,
-        -1.0
+        0.0
     ).xyz;
     outFarPoint = unprojectPoint(
         point.x,
@@ -53,6 +49,8 @@ void main() {
     ).xyz;
 
     // Camera
+    outNear           = camera.clip.x;
+    outFar            = camera.clip.y;
     outViewProjection = camera.viewProjection;
 
     gl_Position = vec4(point, 1.0);

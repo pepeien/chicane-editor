@@ -26,11 +26,11 @@ vec4 grid(vec3 position, float scale, bool hasAxis) {
     }
 
     if ((-1.0 * minimumx) < position.x && position.x < (0.1 * minimumx)) {
-        color.rgb = vec3(0.28);
+        color.rgb = vec3(0.94, 0.15, 0.22);
     }
 
     if ((-1.0 * minimumz) < position.y && position.y < (0.1 * minimumz)) {
-        color.rgb = vec3(0.28);
+        color.rgb = vec3(0.21, 0.21, 0.56);
     }
 
     return color;
@@ -59,12 +59,12 @@ void main() {
     vec3 position  = inNearPoint + (floorDistance * (inFarPoint - inNearPoint));
     vec4 clipSpace = inViewProjection * vec4(position, 1.0);
 
-    outColor  = grid(position, 1, true);
-    outColor *= smoothstep(0.08, 0.0, computeFade(clipSpace));
+    outColor  = grid(position, 1.25, true);
+    outColor *= smoothstep(1.0, 0.0, computeFade(clipSpace));
 
     gl_FragDepth = computeDepth(clipSpace);
 
-    if (floorDistance < 0 || outColor.a <= 0.0) {
+    if (floorDistance < 0 || outColor.a <= 0.2) {
         discard;
     }
 }
