@@ -14,10 +14,8 @@ namespace Factory
             : Chicane::Actor(),
             m_mesh(std::make_unique<Chicane::MeshComponent>())
         {
-            setAbsoluteScale(Chicane::Vec<3, float>(0.05f));
-
             m_mesh->setOwner(this);
-            m_mesh->setMesh("Content/Meshes/Aircraft.box");
+            m_mesh->setMesh("Content/Meshes/Cube.box");
             m_mesh->activate();
         }
 
@@ -36,6 +34,8 @@ namespace Factory
         Chicane::setActiveLevel(level.get());
 
         Chicane::CameraActor* character = new Chicane::CameraActor();
+        character->setAbsoluteTranslation(Chicane::Vec<3, float>(-2.5f, -10.0f, 5.0f));
+        character->setAbsoluteRotation(Chicane::Vec<3, float>(0.0f, -10.0f, -25.0f));
         Chicane::addActor(character);
         Chicane::getActiveController()->attachTo(character);
 
