@@ -3,17 +3,26 @@
 #include "Layer.hpp"
 #include "View.hpp"
 
+#include "Chicane/Game/Actor/Component/Mesh.hpp"
+
 namespace Factory
 {
     class DefaultActor : public Chicane::Actor
     {
     public:
         DefaultActor()
-            : Chicane::Actor()
+            : Chicane::Actor(),
+            m_mesh(std::make_unique<Chicane::MeshComponent>())
         {
             setAbsoluteScale(Chicane::Vec<3, float>(0.05f));
-            setMesh(Chicane::Allocator::load("Content/Meshes/Aircraft.box"));
+
+            m_mesh->setOwner(this);
+            m_mesh->setMesh("Content/Meshes/Aircraft.box");
+            m_mesh->activate();
         }
+
+    private:
+        std::unique_ptr<Chicane::MeshComponent> m_mesh;
     };
 
     void run()
