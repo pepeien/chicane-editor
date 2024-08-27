@@ -14,7 +14,7 @@ namespace Factory
             : Chicane::Actor(),
             m_mesh(std::make_unique<Chicane::MeshComponent>())
         {
-            m_mesh->setOwner(this);
+            m_mesh->attachTo(this);
             m_mesh->setMesh("Content/Meshes/Cube.box");
             m_mesh->activate();
         }
