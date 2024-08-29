@@ -1,12 +1,26 @@
 #include "View.hpp"
 
 #include "Chicane/Core.hpp"
+#include "Chicane/Game.hpp"
+#include "Chicane/Game/Actor/Component/Mesh.hpp"
 
 namespace Factory
 {
-    Actor::Actor()
-        : Chicane::Actor()
-    {}
+    class MeshActor : public Chicane::Actor
+    {
+    public:
+        MeshActor(const std::string& inMesh)
+            : Chicane::Actor(),
+            m_mesh(std::make_unique<Chicane::MeshComponent>())
+        {
+            m_mesh->attachTo(this);
+            m_mesh->setMesh(inMesh);
+            m_mesh->activate();
+        }
+
+    private:
+        std::unique_ptr<Chicane::MeshComponent> m_mesh;
+    };
 
     View::View()
         : Chicane::Grid::View(
@@ -100,7 +114,15 @@ namespace Factory
 
         if (item.type != Chicane::FileSystem::ListType::Folder)
         {
-            Chicane::Grid::TextComponent::compileRaw(item.name);
+            if (
+                ImGui::Button(
+                    item.name.c_str(),
+                    ImVec2(200, 20)
+                )
+            )
+            {
+                Chicane::addActor(new MeshActor(item.path));
+            }
 
             return 0;
         }
