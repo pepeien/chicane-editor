@@ -4,6 +4,14 @@
         <Text>{{ getFrametime() }} ms</Text>
     </List>
     <List id="sideBar" direction="column">
+        <Text>Outline</Text>
+        <List
+            id="outline"
+            direction="column"
+            items="actors"
+            item-getter="showActor"
+        >
+        </List>
     </List>
     <List id="bottomBar" direction="column">
         <List

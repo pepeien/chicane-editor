@@ -4,6 +4,8 @@
 #include "Chicane/Game.hpp"
 #include "Chicane/Game/Actor/Component/Mesh.hpp"
 
+#include <cstdlib>
+
 namespace Factory
 {
     class MeshActor : public Chicane::Actor
@@ -13,6 +15,14 @@ namespace Factory
             : Chicane::Actor(),
             m_mesh(std::make_unique<Chicane::MeshComponent>())
         {
+            setAbsoluteTranslation(
+                Chicane::Vec<3, float>(
+                    std::rand() % 100,
+                    std::rand() % 100,
+                    std::rand() % 10
+                )
+            );
+
             m_mesh->attachTo(this);
             m_mesh->setMesh(inMesh);
             m_mesh->activate();
@@ -29,8 +39,29 @@ namespace Factory
         ),
         m_currentDirectory("")
     {
+        Chicane::watchActiveLevel(
+            [this](Chicane::Level* inLevel)
+            {
+                if (!inLevel)
+                {
+                    updateOutline();
+                }
+
+                inLevel->watchActors(
+                    [this](Chicane::Actor* inActor)
+                    {
+                        updateOutline();
+                    }
+                );
+            }
+        );
+
         listDir(".");
 
+        addVariable(
+            "actors",
+            &m_actors
+        );
         addVariable(
             "directoryHistory",
             &m_directoryHistory
@@ -49,12 +80,31 @@ namespace Factory
             std::bind(&View::getFrametime, this, std::placeholders::_1)
         );
         addFunction(
+            "showActor",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showActor(std::any_cast<std::string>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
+        addFunction(
             "showDirectoryHistory",
-            std::bind(&View::showDirectoryHistory, this, std::placeholders::_1)
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showDirectoryHistory(std::any_cast<std::string>(inEvent.values[0]));
+
+                return 0;
+            }
         );
         addFunction(
             "showDirectory",
-            std::bind(&View::showDirectory, this, std::placeholders::_1)
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showDirectory(std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]));
+
+                return 0;
+            }
         );
     }
 
@@ -70,11 +120,14 @@ namespace Factory
         return std::string(frametime.begin(), frametime.end() - 5);
     }
 
-    int View::showDirectoryHistory(const Chicane::Grid::ComponentEvent& inEvent)
+    void View::showActor(const std::string& inActor)
     {
-        std::string item = std::any_cast<std::string>(inEvent.values[0]);
+        Chicane::Grid::TextComponent::compileRaw(inActor);
+    }
 
-        std::vector<std::string> tree = Chicane::Utils::split(item, '\\');
+    void View::showDirectoryHistory(const std::string& inPath)
+    {
+        std::vector<std::string> tree = Chicane::Utils::split(inPath, '\\');
 
         for (int i = 0; i < tree.size(); i++)
         {
@@ -104,30 +157,26 @@ namespace Factory
 
             ImGui::SameLine();
         }
-
-        return 0;
     }
 
-    int View::showDirectory(const Chicane::Grid::ComponentEvent& inEvent)
+    void View::showDirectory(const Chicane::FileSystem::ListItem& inList)
     {
-        auto item = std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]);
-
-        if (item.type != Chicane::FileSystem::ListType::Folder)
+        if (inList.type != Chicane::FileSystem::ListType::Folder)
         {
             if (
                 ImGui::Button(
-                    item.name.c_str(),
+                    inList.name.c_str(),
                     ImVec2(200, 20)
                 )
             )
             {
-                Chicane::addActor(new MeshActor(item.path));
+                Chicane::addActor(new MeshActor(inList.path));
             }
 
-            return 0;
+            return;
         }
 
-        std::string title = item.name + " - " + std::to_string(item.childCount) + " Items";
+        std::string title = inList.name + " - " + std::to_string(inList.childCount) + " Items";
 
         if (
             ImGui::Button(
@@ -136,10 +185,42 @@ namespace Factory
             )
         )
         {
-            listDir(item.path);
+            listDir(inList.path);
+        }
+    }
+
+    void View::updateOutline()
+    {
+        std::unordered_map<std::string, std::uint32_t> ids {};
+
+        std::vector<std::any> actors {};
+
+        for (Chicane::Actor* actor : Chicane::getActors())
+        {
+            std::vector<std::string> splittedId = Chicane::Utils::split(
+                typeid(*actor).name(),
+                ':'
+            );
+            std::string id = splittedId.back();
+
+            if (ids.find(id) == ids.end())
+            {
+                ids.insert(
+                    std::make_pair(
+                        id,
+                        -1
+                    )
+                );
+            }
+
+            ids.at(id)++;
+
+            actors.push_back(
+                std::make_any<std::string>(id + "-" + std::to_string(ids.at(id)))
+            );
         }
 
-        return 0;
+        m_actors = std::make_any<std::vector<std::any>>(actors);
     }
 
     void View::updateDirHistory()
