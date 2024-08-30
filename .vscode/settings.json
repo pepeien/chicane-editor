@@ -97,6 +97,7 @@
         "stack": "cpp",
         "*.inc": "cpp",
         "bitset": "cpp",
-        "xstddef": "cpp"
+        "xstddef": "cpp",
+        "expected": "cpp"
     }
 }

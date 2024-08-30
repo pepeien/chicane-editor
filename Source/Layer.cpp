@@ -89,7 +89,7 @@ namespace Factory
 
         // Renderpass
         std::vector<vk::ClearValue> clearValues;
-        clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 0.0f));
+        clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
         clearValues.push_back(vk::ClearDepthStencilValue(1.f, 0u));
 
         vk::RenderPassBeginInfo renderPassBeginInfo = {};
@@ -171,7 +171,7 @@ namespace Factory
         }
 
         Chicane::GraphicsPipeline::CreateInfo createInfo = {};
-        createInfo.canOverwrite         = false;
+        createInfo.canOverwrite         = true;
         createInfo.hasVertices          = true;
         createInfo.hasDepth             = true;
         createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
