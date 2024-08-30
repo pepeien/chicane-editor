@@ -8,28 +8,24 @@ layout(location = 2) in vec3 inNearPoint;
 layout(location = 3) in vec3 inFarPoint;
 layout(location = 4) in mat4 inViewProjection;
 
-vec4 grid(vec3 position, float scale, bool hasAxis) {
+vec4 grid(vec3 position, float scale) {
     vec2 coord      = position.xy * scale;
     vec2 derivative = fwidth(coord);
     vec2 uv         = fract(coord - 0.5) - 0.5;
     vec2 grid       = abs(uv) / derivative;
 
     float line     = min(grid.x, grid.y);
-    float minimumz = min(derivative.y, 1.0);
     float minimumx = min(derivative.x, 1.0);
+    float minimumy = min(derivative.y, 1.0);
 
-    vec4 color = vec4(0.34);
+    vec4 color = vec4(0.14);
     color.a    = 1.0 - min(line, 1.0);
 
-    if (!hasAxis) {
-        return color;
-    }
-
-    if ((-1.0 * minimumx) < position.x && position.x < (0.1 * minimumx)) {
+    if (position.x > (-0.1 * minimumx) && position.x < (0.1 * minimumx)) {
         color.rgb = vec3(0.94, 0.15, 0.22);
     }
 
-    if ((-1.0 * minimumz) < position.y && position.y < (0.1 * minimumz)) {
+    if (position.y > (-0.1 * minimumy) && position.y < (0.1 * minimumy)) {
         color.rgb = vec3(0.21, 0.21, 0.56);
     }
 
@@ -37,18 +33,12 @@ vec4 grid(vec3 position, float scale, bool hasAxis) {
 }
 
 float computeDepth(vec4 clipSpace) {
-    return clipSpace.z / clipSpace.w;
+    return clipSpace.y / clipSpace.w;
 }
 
-float computeLinearDepth(vec4 clipSpace) {
-    float clippedDepth = (clipSpace.z / clipSpace.w) * 2.0 - 1.0;
+float computeLinearDepth(float depth) {
+    float clippedDepth = (depth * 2.0) - 1.0;
     float linearDepth  = (2.0 * inNear * inFar) / (inFar + inNear - clippedDepth * (inFar - inNear));
-
-    return linearDepth / inFar;
-}
-
-float computeFade(vec4 clipSpace) {
-    float linearDepth = computeLinearDepth(clipSpace);
 
     return linearDepth / inFar;
 }
@@ -56,15 +46,12 @@ float computeFade(vec4 clipSpace) {
 void main() {
     float floorDistance = -inNearPoint.z / (inFarPoint.z - inNearPoint.z);
 
-    vec3 position  = inNearPoint + (floorDistance * (inFarPoint - inNearPoint));
-    vec4 clipSpace = inViewProjection * vec4(position, 1.0);
+    vec3 position  = inNearPoint + floorDistance * (inFarPoint - inNearPoint);
+    vec4 clipSpace = inViewProjection * vec4(position.xyz, 1.0);
+    float depth    = computeDepth(clipSpace);
 
-    outColor  = grid(position, 1.25, true);
-    outColor *= smoothstep(1.0, 0.0, computeFade(clipSpace));
+    outColor    = (grid(position, 10) + grid(position, 1)) * float(floorDistance > 0.0);
+    outColor.a *= max(0.0, (0.5 - computeLinearDepth(depth)));
 
-    gl_FragDepth = computeDepth(clipSpace);
-
-    if (floorDistance < 0 || outColor.a <= 0.2) {
-        discard;
-    }
+    gl_FragDepth = depth;
 }
