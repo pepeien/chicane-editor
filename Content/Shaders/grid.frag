@@ -32,12 +32,8 @@ vec4 grid(vec3 position, float scale) {
     return color;
 }
 
-float computeDepth(vec4 clipSpace) {
-    return clipSpace.y / clipSpace.w;
-}
-
 float computeLinearDepth(float depth) {
-    float clippedDepth = (depth * 2.0) - 1.0;
+    float clippedDepth = depth * 2.0 - 1.0;
     float linearDepth  = (2.0 * inNear * inFar) / (inFar + inNear - clippedDepth * (inFar - inNear));
 
     return linearDepth / inFar;
@@ -46,12 +42,19 @@ float computeLinearDepth(float depth) {
 void main() {
     float floorDistance = -inNearPoint.z / (inFarPoint.z - inNearPoint.z);
 
+    if (floorDistance < 0.0) {
+        outColor = vec4(0.0);
+
+        return;
+    }
+
     vec3 position  = inNearPoint + floorDistance * (inFarPoint - inNearPoint);
     vec4 clipSpace = inViewProjection * vec4(position.xyz, 1.0);
-    float depth    = computeDepth(clipSpace);
+    float depth    = clipSpace.y / clipSpace.w;
 
-    outColor    = (grid(position, 10) + grid(position, 1)) * float(floorDistance > 0.0);
-    outColor.a *= max(0.0, (0.5 - computeLinearDepth(depth)));
+    outColor     = grid(position, 1.0);
+    outColor    += grid(position, 10.0);
+    outColor.a  *= max(0.0, (0.5 - computeLinearDepth(depth)));
 
     gl_FragDepth = depth;
 }

@@ -90,7 +90,7 @@ namespace Factory
         // Renderpass
         std::vector<vk::ClearValue> clearValues;
         clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
-        clearValues.push_back(vk::ClearDepthStencilValue(1.f, 0u));
+        clearValues.push_back(vk::ClearDepthStencilValue(1.0f, 0));
 
         vk::RenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.renderPass          = m_graphicsPipeline->renderPass;
@@ -138,8 +138,6 @@ namespace Factory
         );
 
         inCommandBuffer.endRenderPass();
-
-        return;
     }
 
     void Layer::initFrameDescriptorSetLayout()

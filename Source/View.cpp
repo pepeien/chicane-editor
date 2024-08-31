@@ -8,30 +8,6 @@
 
 namespace Factory
 {
-    class MeshActor : public Chicane::Actor
-    {
-    public:
-        MeshActor(const std::string& inMesh)
-            : Chicane::Actor(),
-            m_mesh(std::make_unique<Chicane::MeshComponent>())
-        {
-            setAbsoluteTranslation(
-                Chicane::Vec<3, float>(
-                    std::rand() % 100,
-                    std::rand() % 100,
-                    std::rand() % 10
-                )
-            );
-
-            m_mesh->attachTo(this);
-            m_mesh->setMesh(inMesh);
-            m_mesh->activate();
-        }
-
-    private:
-        std::unique_ptr<Chicane::MeshComponent> m_mesh;
-    };
-
     View::View()
         : Chicane::Grid::View(
             "home",
@@ -127,7 +103,7 @@ namespace Factory
 
     void View::showDirectoryHistory(const std::string& inPath)
     {
-        std::vector<std::string> tree = Chicane::Utils::split(inPath, '\\');
+        std::vector<std::string> tree = Chicane::Utils::split(inPath, '/');
 
         for (int i = 0; i < tree.size(); i++)
         {
@@ -145,7 +121,7 @@ namespace Factory
                 for (int j = 0; j <= i; j++)
                 {
                     path += tree.at(j);
-                    path += "\\";
+                    path += "/";
                 }
 
                 listDir(path);
@@ -153,7 +129,7 @@ namespace Factory
 
             ImGui::SameLine();
 
-            Chicane::Grid::TextComponent::compileRaw("\\");
+            Chicane::Grid::TextComponent::compileRaw("/");
 
             ImGui::SameLine();
         }
@@ -170,7 +146,16 @@ namespace Factory
                 )
             )
             {
-                Chicane::addActor(new MeshActor(inList.path));
+                MeshActor* actor = new MeshActor(inList.path);
+                actor->setAbsoluteTranslation(
+                    Chicane::Vec<3, float>(
+                        std::rand() % 100,
+                        std::rand() % 100,
+                        std::rand() % 10
+                    )
+                );
+
+                Chicane::addActor(actor);
             }
 
             return;
