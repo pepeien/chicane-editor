@@ -24,7 +24,7 @@
         </List>
         <Grid
             id="dirContent"
-            item-width="15vw"
+            item-width="18vh"
             item-height="49px"
             items="directoryInfo"
             item-getter="showDirectory"

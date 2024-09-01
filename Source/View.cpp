@@ -103,38 +103,21 @@ namespace Factory
 
     void View::showDirectoryHistory(const std::string& inPath)
     {
-        std::vector<std::string> tree = Chicane::Utils::split(
+        std::vector<std::string> splittedPath = Chicane::Utils::split(
             inPath,
             Chicane::FileSystem::SEPARATOR
         );
 
-        for (int i = 0; i < tree.size(); i++)
-        {
-            const std::string& folder = tree.at(i);
+        const std::string& folderName = splittedPath.back();
 
-            if (
-                ImGui::Button(
-                    folder.c_str(),
-                    ImVec2(50, 20)
-                )
+        if (
+            ImGui::Button(
+                folderName.c_str(),
+                ImVec2(50, 20)
             )
-            {
-                std::string path = "";
-
-                for (int j = 0; j <= i; j++)
-                {
-                    path += tree.at(j);
-                    path += Chicane::FileSystem::SEPARATOR;
-                }
-
-                listDir(path);
-            }
-
-            ImGui::SameLine();
-
-            Chicane::Grid::TextComponent::compileRaw("/");
-
-            ImGui::SameLine();
+        )
+        {
+            listDir(inPath);
         }
     }
 
@@ -215,9 +198,25 @@ namespace Factory
     {
         std::vector<std::any> items = {};
 
-        items.push_back(
-            std::make_any<std::string>(m_currentDirectory)
+        std::vector<std::string> splittedPath = Chicane::Utils::split(
+            m_currentDirectory,
+            Chicane::FileSystem::SEPARATOR
         );
+
+        for (std::uint32_t i = 0; i < splittedPath.size(); i++)
+        {
+            std::string path = "";
+            
+            for (std::uint32_t j = 0; j <= i; j++)
+            {
+                path += splittedPath.at(j);
+                path += Chicane::FileSystem::SEPARATOR;
+            }
+
+            items.push_back(
+                std::make_any<std::string>(path)
+            );
+        }
 
         m_directoryHistory = std::make_any<std::vector<std::any>>(items);
     }
