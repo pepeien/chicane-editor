@@ -103,7 +103,10 @@ namespace Factory
 
     void View::showDirectoryHistory(const std::string& inPath)
     {
-        std::vector<std::string> tree = Chicane::Utils::split(inPath, '/');
+        std::vector<std::string> tree = Chicane::Utils::split(
+            inPath,
+            Chicane::FileSystem::SEPARATOR
+        );
 
         for (int i = 0; i < tree.size(); i++)
         {
@@ -121,7 +124,7 @@ namespace Factory
                 for (int j = 0; j <= i; j++)
                 {
                     path += tree.at(j);
-                    path += "/";
+                    path += Chicane::FileSystem::SEPARATOR;
                 }
 
                 listDir(path);
@@ -135,42 +138,42 @@ namespace Factory
         }
     }
 
-    void View::showDirectory(const Chicane::FileSystem::ListItem& inList)
+    void View::showDirectory(const Chicane::FileSystem::ListItem& inItem)
     {
-        if (inList.type != Chicane::FileSystem::ListType::Folder)
+        if (inItem.type == Chicane::FileSystem::ListType::Folder)
         {
+            std::string title = inItem.name + " - " + std::to_string(inItem.childCount) + " Items";
+
             if (
                 ImGui::Button(
-                    inList.name.c_str(),
+                    title.c_str(),
                     ImVec2(200, 20)
                 )
             )
             {
-                MeshActor* actor = new MeshActor(inList.path);
-                actor->setAbsoluteTranslation(
-                    Chicane::Vec<3, float>(
-                        std::rand() % 100,
-                        std::rand() % 100,
-                        std::rand() % 10
-                    )
-                );
-
-                Chicane::addActor(actor);
+                listDir(inItem.path);
             }
 
             return;
         }
 
-        std::string title = inList.name + " - " + std::to_string(inList.childCount) + " Items";
-
         if (
             ImGui::Button(
-                title.c_str(),
+                inItem.name.c_str(),
                 ImVec2(200, 20)
             )
         )
         {
-            listDir(inList.path);
+            MeshActor* actor = new MeshActor(inItem.path);
+            actor->setAbsoluteTranslation(
+                Chicane::Vec<3, float>(
+                    std::rand() % 100,
+                    std::rand() % 100,
+                    std::rand() % 10
+                )
+            );
+
+            Chicane::addActor(actor);
         }
     }
 
