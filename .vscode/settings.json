@@ -98,6 +98,7 @@
         "*.inc": "cpp",
         "bitset": "cpp",
         "xstddef": "cpp",
-        "expected": "cpp"
+        "expected": "cpp",
+        "text_encoding": "cpp"
     }
 }

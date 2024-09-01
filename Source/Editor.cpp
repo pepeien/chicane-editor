@@ -7,7 +7,7 @@ namespace Factory
 {
     void run()
     {
-        Chicane::Allocator::load("Content/Textures/Skybox/Gray.box");
+        Chicane::Loader::loadCubemap("Content/Textures/Skybox/Gray.box");
 
         std::unique_ptr<Chicane::Controller> controller = std::make_unique<Chicane::Controller>();
         Chicane::setActiveController(controller.get());

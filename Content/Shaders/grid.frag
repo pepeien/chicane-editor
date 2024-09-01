@@ -8,7 +8,7 @@ layout(location = 2) in vec3 inNearPoint;
 layout(location = 3) in vec3 inFarPoint;
 layout(location = 4) in mat4 inViewProjection;
 
-vec4 grid(vec3 position, float scale) {
+vec4 grid(vec3 position, float scale, bool hasAxis) {
     vec2 coord      = position.xy * scale;
     vec2 derivative = fwidth(coord);
     vec2 uv         = fract(coord - 0.5) - 0.5;
@@ -20,6 +20,10 @@ vec4 grid(vec3 position, float scale) {
 
     vec4 color = vec4(0.14);
     color.a    = 1.0 - min(line, 1.0);
+
+    if (hasAxis == false) {
+        return color;
+    }
 
     if (position.x > (-0.1 * minimumx) && position.x < (0.1 * minimumx)) {
         color.rgb = vec3(0.94, 0.15, 0.22);
@@ -52,8 +56,8 @@ void main() {
     vec4 clipSpace = inViewProjection * vec4(position.xyz, 1.0);
     float depth    = clipSpace.y / clipSpace.w;
 
-    outColor     = grid(position, 1.0);
-    outColor    += grid(position, 10.0);
+    outColor     = grid(position, 1.0, false);
+    outColor    += grid(position, 10.0, true);
     outColor.a  *= max(0.0, (0.5 - computeLinearDepth(depth)));
 
     gl_FragDepth = depth;
