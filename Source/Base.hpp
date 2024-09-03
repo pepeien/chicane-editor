@@ -1,7 +1,5 @@
 #pragma once
 
-#include <filesystem>
-
 #include "Chicane/Base.hpp"
 #include "Chicane/Core.hpp"
 #include "Chicane/Game.hpp"

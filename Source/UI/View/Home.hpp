@@ -4,16 +4,10 @@
 
 namespace Factory
 {
-    class Actor : public Chicane::Actor
+    class HomeView : public Chicane::Grid::View
     {
     public:
-        Actor();
-    };
-
-    class View : public Chicane::Grid::View
-    {
-    public:
-        View();
+        HomeView();
 
     private:
         std::uint32_t getFPS(const Chicane::Grid::ComponentEvent& inEvent);
@@ -27,12 +21,14 @@ namespace Factory
         void updateOutline();
         void updateDirHistory();
         void listDir(const std::string& inPath);
+        void showLog(const Chicane::Log::Instance& inLog);
 
     private:
         // Render
         std::any m_actors;
         std::any m_directoryHistory;
         std::any m_directoryInfo;
+        std::any m_logs;
 
         // Internal
         std::string m_currentDirectory;

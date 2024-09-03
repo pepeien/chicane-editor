@@ -1,7 +1,7 @@
 #include "Editor.hpp"
 
 #include "Layer.hpp"
-#include "View.hpp"
+#include "UI/View/Home.hpp"
 
 namespace Factory
 {
@@ -21,7 +21,7 @@ namespace Factory
         Chicane::addActor(character);
         Chicane::getActiveController()->attachTo(character);
 
-        std::unique_ptr<View> view = std::make_unique<View>();
+        std::unique_ptr<HomeView> view = std::make_unique<HomeView>();
         Chicane::Grid::addView(view.get());
         Chicane::Grid::setActiveView(view->getId());
 
@@ -36,7 +36,7 @@ namespace Factory
         std::unique_ptr<Chicane::Window> window = std::make_unique<Chicane::Window>(windowCreateInfo);
         window->addLayer(
             new Layer(window.get()),
-            Chicane::Layer::Push::BeforeLayer,
+            Chicane::Layer::Push::AfterLayer,
             "Level"
         );
         window->run();

@@ -1,4 +1,4 @@
-#include "View.hpp"
+#include "Ui/View/Home.hpp"
 
 #include "Chicane/Core.hpp"
 #include "Chicane/Game.hpp"
@@ -8,13 +8,26 @@
 
 namespace Factory
 {
-    View::View()
+    HomeView::HomeView()
         : Chicane::Grid::View(
             "home",
             "Content/View/Home.grid"
         ),
         m_currentDirectory("")
     {
+        Chicane::Log::watchLogs(
+            [this](const Chicane::Log::List& inLogs)
+            {
+                std::vector<std::any> logs;
+
+                for (const Chicane::Log::Instance& log : inLogs)
+                {
+                    logs.push_back(std::make_any<Chicane::Log::Instance>(log));
+                }
+
+                m_logs = std::make_any<std::vector<std::any>>(logs);
+            }
+        );
         Chicane::watchActiveLevel(
             [this](Chicane::Level* inLevel)
             {
@@ -46,14 +59,18 @@ namespace Factory
             "directoryInfo",
             &m_directoryInfo
         );
+        addVariable(
+            "logs",
+            &m_logs
+        );
 
         addFunction(
             "getFPS",
-            std::bind(&View::getFPS, this, std::placeholders::_1)
+            std::bind(&HomeView::getFPS, this, std::placeholders::_1)
         );
         addFunction(
             "getFrametime",
-            std::bind(&View::getFrametime, this, std::placeholders::_1)
+            std::bind(&HomeView::getFrametime, this, std::placeholders::_1)
         );
         addFunction(
             "showActor",
@@ -82,26 +99,36 @@ namespace Factory
                 return 0;
             }
         );
+        addFunction(
+            "showLog",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showLog(std::any_cast<Chicane::Log::Instance>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
     }
 
-    std::uint32_t View::getFPS(const Chicane::Grid::ComponentEvent& inEvent)
+    std::uint32_t HomeView::getFPS(const Chicane::Grid::ComponentEvent& inEvent)
     {
         return Chicane::getTelemetry().frame.rate;
     }
 
-    std::string View::getFrametime(const Chicane::Grid::ComponentEvent& inEvent)
+    std::string HomeView::getFrametime(const Chicane::Grid::ComponentEvent& inEvent)
     {
         std::string frametime = std::to_string(Chicane::getTelemetry().frame.time);
 
         return std::string(frametime.begin(), frametime.end() - 5);
     }
 
-    void View::showActor(const std::string& inActor)
+    void HomeView::showActor(const std::string& inActor)
     {
-        Chicane::Grid::TextComponent::compileRaw(inActor);
+        Chicane::Grid::Style style {};
+        Chicane::Grid::TextComponent::compileRaw(inActor, style);
     }
 
-    void View::showDirectoryHistory(const std::string& inPath)
+    void HomeView::showDirectoryHistory(const std::string& inPath)
     {
         std::vector<std::string> splittedPath = Chicane::Utils::split(
             inPath,
@@ -121,7 +148,7 @@ namespace Factory
         }
     }
 
-    void View::showDirectory(const Chicane::FileSystem::ListItem& inItem)
+    void HomeView::showDirectory(const Chicane::FileSystem::ListItem& inItem)
     {
         if (inItem.type == Chicane::FileSystem::ListType::Folder)
         {
@@ -160,7 +187,7 @@ namespace Factory
         }
     }
 
-    void View::updateOutline()
+    void HomeView::updateOutline()
     {
         std::unordered_map<std::string, std::uint32_t> ids {};
 
@@ -194,7 +221,7 @@ namespace Factory
         m_actors = std::make_any<std::vector<std::any>>(actors);
     }
 
-    void View::updateDirHistory()
+    void HomeView::updateDirHistory()
     {
         std::vector<std::any> items = {};
 
@@ -221,7 +248,7 @@ namespace Factory
         m_directoryHistory = std::make_any<std::vector<std::any>>(items);
     }
 
-    void View::listDir(const std::string& inPath)
+    void HomeView::listDir(const std::string& inPath)
     {
         std::vector<std::any> items = {};
 
@@ -253,5 +280,18 @@ namespace Factory
         m_currentDirectory = inPath;
 
         updateDirHistory();
+    }
+
+    void HomeView::showLog(const Chicane::Log::Instance& inLog)
+    {
+        if (inLog.isEmpty())
+        {
+            return;
+        }
+
+        Chicane::Grid::Style style {};
+        style.foregroundColor = inLog.color;
+
+        Chicane::Grid::TextComponent::compileRaw(inLog.text, style);
     }
 }

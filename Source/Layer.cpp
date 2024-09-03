@@ -169,7 +169,7 @@ namespace Factory
         }
 
         Chicane::GraphicsPipeline::CreateInfo createInfo = {};
-        createInfo.canOverwrite         = true;
+        createInfo.canOverwrite         = false;
         createInfo.hasVertices          = true;
         createInfo.hasDepth             = true;
         createInfo.logicalDevice        = m_rendererInternals.logicalDevice;

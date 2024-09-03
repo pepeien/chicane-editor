@@ -1,4 +1,19 @@
 <View id="home" style="Content/View/Home.decal">
+    <Popup id="console">
+        <List id="consoleWrapper">
+            <List id="consoleHeader">
+                <List id="consoleHeaderText">
+                    <Text>Console</Text>
+                </List>
+            </List>
+            <List
+                id="consoleLog"
+                items="logs"
+                item-getter="showLog"
+            >
+            </List>
+        </List>
+    </Popup>
     <List id="viewport">
         <Text>{{ getFPS() }} FPS</Text>
         <Text>{{ getFrametime() }} ms</Text>
