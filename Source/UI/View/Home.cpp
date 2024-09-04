@@ -1,4 +1,4 @@
-#include "Ui/View/Home.hpp"
+#include "UI/View/Home.hpp"
 
 #include "Chicane/Core.hpp"
 #include "Chicane/Game.hpp"
