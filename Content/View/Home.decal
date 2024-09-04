@@ -1,6 +1,6 @@
 #console {
-    width: 800px;
-    height: 600px;
+    width: 60vw;
+    height: 60vh;
     background-color: #242424;
 }
 
@@ -12,7 +12,6 @@
 #consoleHeaderText {
     margin: auto 0 auto 0.5vh;
     height: 2vh;
-    width: 5vw;
 }
 
 #consoleLog {
@@ -25,6 +24,12 @@
     position: absolute;
     width: 82vw;
     height: 80vh;
+}
+
+#consoleSwitch {
+    width: 7vw;
+    height: 2vh;
+    background-color: #333333;
 }
 
 #sideBar {

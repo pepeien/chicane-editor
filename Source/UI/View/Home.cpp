@@ -13,6 +13,7 @@ namespace Factory
             "home",
             "Content/View/Home.grid"
         ),
+        m_isConsoleOpen(std::make_any<std::string>("true")),
         m_currentDirectory("")
     {
         Chicane::Log::watchLogs(
@@ -25,7 +26,7 @@ namespace Factory
                     logs.push_back(std::make_any<Chicane::Log::Instance>(log));
                 }
 
-                m_logs = std::make_any<std::vector<std::any>>(logs);
+                m_consoleLogs = std::make_any<std::vector<std::any>>(logs);
             }
         );
         Chicane::watchActiveLevel(
@@ -60,8 +61,12 @@ namespace Factory
             &m_directoryInfo
         );
         addVariable(
-            "logs",
-            &m_logs
+            "isConsoleOpen",
+            &m_isConsoleOpen
+        );
+        addVariable(
+            "consoleLogs",
+            &m_consoleLogs
         );
 
         addFunction(
@@ -71,6 +76,15 @@ namespace Factory
         addFunction(
             "getFrametime",
             std::bind(&HomeView::getFrametime, this, std::placeholders::_1)
+        );
+        addFunction(
+            "switchConsole",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                switchConsole();
+
+                return 0;
+            }
         );
         addFunction(
             "showActor",
@@ -120,6 +134,19 @@ namespace Factory
         std::string frametime = std::to_string(Chicane::getTelemetry().frame.time);
 
         return std::string(frametime.begin(), frametime.end() - 5);
+    }
+
+    void HomeView::showLog(const Chicane::Log::Instance& inLog)
+    {
+        if (inLog.isEmpty())
+        {
+            return;
+        }
+
+        Chicane::Grid::Style style {};
+        style.foregroundColor = inLog.color;
+
+        Chicane::Grid::TextComponent::compileRaw(inLog.text, style);
     }
 
     void HomeView::showActor(const std::string& inActor)
@@ -185,6 +212,22 @@ namespace Factory
 
             Chicane::addActor(actor);
         }
+    }
+
+    void HomeView::switchConsole()
+    {
+        std::string isConsoleOpen = std::any_cast<std::string>(m_isConsoleOpen);
+
+        if (isConsoleOpen.compare("true") == 0)
+        {
+            isConsoleOpen = "false";
+        }
+        else
+        {
+            isConsoleOpen = "true";
+        }
+
+        m_isConsoleOpen = std::make_any<std::string>(isConsoleOpen);
     }
 
     void HomeView::updateOutline()
@@ -280,18 +323,5 @@ namespace Factory
         m_currentDirectory = inPath;
 
         updateDirHistory();
-    }
-
-    void HomeView::showLog(const Chicane::Log::Instance& inLog)
-    {
-        if (inLog.isEmpty())
-        {
-            return;
-        }
-
-        Chicane::Grid::Style style {};
-        style.foregroundColor = inLog.color;
-
-        Chicane::Grid::TextComponent::compileRaw(inLog.text, style);
     }
 }

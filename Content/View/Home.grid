@@ -1,5 +1,5 @@
 <View id="home" style="Content/View/Home.decal">
-    <Popup id="console">
+    <Popup id="console" isOpen="{{ isConsoleOpen }}">
         <List id="consoleWrapper">
             <List id="consoleHeader">
                 <List id="consoleHeaderText">
@@ -8,8 +8,8 @@
             </List>
             <List
                 id="consoleLog"
-                items="logs"
-                item-getter="showLog"
+                items="consoleLogs"
+                itemGetter="showLog"
             >
             </List>
         </List>
@@ -17,6 +17,7 @@
     <List id="viewport">
         <Text>{{ getFPS() }} FPS</Text>
         <Text>{{ getFrametime() }} ms</Text>
+        <Button id="consoleSwitch" onClick="switchConsole()">Open Console</Button>
     </List>
     <List id="sideBar" direction="column">
         <Text id="sidebarTitle">Outliner</Text>
@@ -24,7 +25,7 @@
             id="sidebarContent"
             direction="column"
             items="actors"
-            item-getter="showActor"
+            itemGetter="showActor"
         >
         </List>
     </List>
@@ -34,7 +35,7 @@
             id="dirHistory"
             direction="row"
             items="directoryHistory"
-            item-getter="showDirectoryHistory"
+            itemGetter="showDirectoryHistory"
         >
         </List>
         <Grid
@@ -42,7 +43,7 @@
             item-width="18vh"
             item-height="49px"
             items="directoryInfo"
-            item-getter="showDirectory"
+            itemGetter="showDirectory"
         >
         </Grid>
     </List>
