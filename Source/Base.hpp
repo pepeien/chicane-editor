@@ -13,9 +13,17 @@ public:
         : Chicane::Actor(),
         m_mesh(std::make_unique<Chicane::MeshComponent>())
     {
+        setCanTick(true);
+
         m_mesh->attachTo(this);
         m_mesh->setMesh(inMesh);
         m_mesh->activate();
+    }
+
+public:
+    void onTick(float inDelta) override
+    {
+        LOG_INFO("TICK");
     }
 
 private:

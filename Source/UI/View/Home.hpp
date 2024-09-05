@@ -19,7 +19,6 @@ namespace Factory
         void showDirectory(const Chicane::FileSystem::ListItem& inList);
 
     private:
-        void switchConsole();
         void updateOutline();
         void updateDirHistory();
         void listDir(const std::string& inPath);

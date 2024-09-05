@@ -1,10 +1,7 @@
 #include "UI/View/Home.hpp"
 
-#include "Chicane/Core.hpp"
-#include "Chicane/Game.hpp"
+#include "Base.hpp"
 #include "Chicane/Game/Actor/Component/Mesh.hpp"
-
-#include <cstdlib>
 
 namespace Factory
 {
@@ -13,7 +10,7 @@ namespace Factory
             "home",
             "Content/View/Home.grid"
         ),
-        m_isConsoleOpen(std::make_any<std::string>("true")),
+        m_isConsoleOpen(std::make_any<std::string>("false")),
         m_currentDirectory("")
     {
         Chicane::Log::watchLogs(
@@ -49,6 +46,10 @@ namespace Factory
         listDir(".");
 
         addVariable(
+            "consoleLogs",
+            &m_consoleLogs
+        );
+        addVariable(
             "actors",
             &m_actors
         );
@@ -64,10 +65,6 @@ namespace Factory
             "isConsoleOpen",
             &m_isConsoleOpen
         );
-        addVariable(
-            "consoleLogs",
-            &m_consoleLogs
-        );
 
         addFunction(
             "getFPS",
@@ -78,10 +75,28 @@ namespace Factory
             std::bind(&HomeView::getFrametime, this, std::placeholders::_1)
         );
         addFunction(
-            "switchConsole",
+            "showConsole",
             [this](const Chicane::Grid::ComponentEvent& inEvent)
             {
-                switchConsole();
+                m_isConsoleOpen = std::make_any<std::string>("true");
+
+                return 0;
+            }
+        );
+        addFunction(
+            "hideConsole",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                m_isConsoleOpen = std::make_any<std::string>("false");
+
+                return 0;
+            }
+        );
+        addFunction(
+            "showLog",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showLog(std::any_cast<Chicane::Log::Instance>(inEvent.values[0]));
 
                 return 0;
             }
@@ -109,15 +124,6 @@ namespace Factory
             [this](const Chicane::Grid::ComponentEvent& inEvent)
             {
                 showDirectory(std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]));
-
-                return 0;
-            }
-        );
-        addFunction(
-            "showLog",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                showLog(std::any_cast<Chicane::Log::Instance>(inEvent.values[0]));
 
                 return 0;
             }
@@ -151,8 +157,24 @@ namespace Factory
 
     void HomeView::showActor(const std::string& inActor)
     {
-        Chicane::Grid::Style style {};
-        Chicane::Grid::TextComponent::compileRaw(inActor, style);
+        Chicane::Grid::ContainerComponent::Props props {};
+        props.id           = "outlineWrapper-" + inActor;
+        props.style.width  = Chicane::Grid::getSize("100%");
+        props.style.height = Chicane::Grid::getSize("2vh");
+        props._renderers.push_back(
+            [inActor](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                Chicane::Grid::Style style {};
+                style.horizontalAlignment = Chicane::Grid::Alignment::Center;
+                style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+
+                Chicane::Grid::TextComponent::compileRaw(inActor, style);
+
+                return 0;
+            }
+        );
+
+        Chicane::Grid::ContainerComponent::compileRaw(props);
     }
 
     void HomeView::showDirectoryHistory(const std::string& inPath)
@@ -164,70 +186,113 @@ namespace Factory
 
         const std::string& folderName = splittedPath.back();
 
-        if (
-            ImGui::Button(
-                folderName.c_str(),
-                ImVec2(50, 20)
-            )
-        )
+        Chicane::Grid::ButtonComponent::Props props {};
+        props.id = inPath;
+        props.style.width = Chicane::Grid::getSize(
+            "5vw",
+            Chicane::Grid::Direction::Horizontal,
+            Chicane::Grid::Position::Relative
+        );
+        props.style.height = Chicane::Grid::getSize(
+            Chicane::Grid::AUTO_SIZE_UNIT,
+            Chicane::Grid::Direction::Vertical,
+            Chicane::Grid::Position::Relative
+        );
+        props.style.backgroundColor = "#444444";
+        props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
         {
             listDir(inPath);
-        }
+
+            return 0;
+        };
+        props._renderers.push_back(
+            [&](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                Chicane::Grid::Style style {};
+                style.horizontalAlignment = Chicane::Grid::Alignment::Center;
+                style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+
+                Chicane::Grid::TextComponent::compileRaw(folderName, style);
+
+                return 0;
+            }
+        );
+
+        Chicane::Grid::ButtonComponent::compileRaw(props);
     }
 
     void HomeView::showDirectory(const Chicane::FileSystem::ListItem& inItem)
     {
+        Chicane::Grid::ButtonComponent::Props props {};
+        props.id = inItem.path;
+        props.style.width = Chicane::Grid::getSize(
+            Chicane::Grid::AUTO_SIZE_UNIT,
+            Chicane::Grid::Direction::Horizontal,
+            Chicane::Grid::Position::Relative
+        );
+        props.style.height = Chicane::Grid::getSize(
+            Chicane::Grid::AUTO_SIZE_UNIT,
+            Chicane::Grid::Direction::Vertical,
+            Chicane::Grid::Position::Relative
+        );
+        props.style.backgroundColor = "#444444";
+
         if (inItem.type == Chicane::FileSystem::ListType::Folder)
         {
-            std::string title = inItem.name + " - " + std::to_string(inItem.childCount) + " Items";
-
-            if (
-                ImGui::Button(
-                    title.c_str(),
-                    ImVec2(200, 20)
-                )
-            )
+            props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
             {
                 listDir(inItem.path);
-            }
 
-            return;
-        }
+                return 0;
+            };
+            props._renderers.push_back(
+                [&](const Chicane::Grid::ComponentEvent& inEvent)
+                {
+                    Chicane::Grid::Style style {};
+                    style.horizontalAlignment = Chicane::Grid::Alignment::Center;
+                    style.verticalAlignment   = Chicane::Grid::Alignment::Center;
 
-        if (
-            ImGui::Button(
-                inItem.name.c_str(),
-                ImVec2(200, 20)
-            )
-        )
-        {
-            MeshActor* actor = new MeshActor(inItem.path);
-            actor->setAbsoluteTranslation(
-                Chicane::Vec<3, float>(
-                    std::rand() % 100,
-                    std::rand() % 100,
-                    std::rand() % 10
-                )
+                    std::string title = inItem.name + " - " + std::to_string(inItem.childCount) + " Items";
+
+                    Chicane::Grid::TextComponent::compileRaw(title, style);
+
+                    return 0;
+                }
             );
-
-            Chicane::addActor(actor);
         }
-    }
 
-    void HomeView::switchConsole()
-    {
-        std::string isConsoleOpen = std::any_cast<std::string>(m_isConsoleOpen);
-
-        if (Chicane::Utils::areEquals(isConsoleOpen, "true"))
+        if (inItem.type == Chicane::FileSystem::ListType::File)
         {
-            isConsoleOpen = "false";
-        }
-        else
-        {
-            isConsoleOpen = "true";
+            props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                MeshActor* actor = new MeshActor(inItem.path);
+                actor->setAbsoluteTranslation(
+                    Chicane::Vec<3, float>(
+                        std::rand() % 100,
+                        std::rand() % 100,
+                        std::rand() % 10
+                    )
+                );
+
+                Chicane::addActor(actor);
+
+                return 0;
+            };
+            props._renderers.push_back(
+                [&](const Chicane::Grid::ComponentEvent& inEvent)
+                {
+                    Chicane::Grid::Style style {};
+                    style.horizontalAlignment = Chicane::Grid::Alignment::Center;
+                    style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+
+                    Chicane::Grid::TextComponent::compileRaw(inItem.name, style);
+
+                    return 0;
+                }
+            );
         }
 
-        m_isConsoleOpen = std::make_any<std::string>(isConsoleOpen);
+        Chicane::Grid::ButtonComponent::compileRaw(props);
     }
 
     void HomeView::updateOutline()
