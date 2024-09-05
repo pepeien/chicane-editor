@@ -36,7 +36,7 @@ namespace Factory
         std::unique_ptr<Chicane::Window> window = std::make_unique<Chicane::Window>(windowCreateInfo);
         window->addLayer(
             new Layer(window.get()),
-            Chicane::Layer::Push::AfterLayer,
+            Chicane::Layer::Push::BeforeLayer,
             "Level"
         );
         window->run();

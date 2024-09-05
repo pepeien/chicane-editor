@@ -218,7 +218,7 @@ namespace Factory
     {
         std::string isConsoleOpen = std::any_cast<std::string>(m_isConsoleOpen);
 
-        if (isConsoleOpen.compare("true") == 0)
+        if (Chicane::Utils::areEquals(isConsoleOpen, "true"))
         {
             isConsoleOpen = "false";
         }
@@ -308,7 +308,7 @@ namespace Factory
 
             std::string extension = item.extension;
 
-            if (extension.compare(".box") != 0 && extension.compare(".grid") != 0)
+            if (!Chicane::Utils::areEquals(extension, ".box") && !Chicane::Utils::areEquals(extension, ".grid"))
             {
                 continue;
             }

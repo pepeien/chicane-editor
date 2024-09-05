@@ -4,6 +4,9 @@
             <List id="consoleHeader">
                 <List id="consoleHeaderText">
                     <Text>Console</Text>
+                    <Button id="consoleClose" onClick="switchConsole()">
+                        <Text>X</Text>
+                    </Button>
                 </List>
             </List>
             <List
@@ -17,32 +20,32 @@
     <List id="viewport">
         <Text>{{ getFPS() }} FPS</Text>
         <Text>{{ getFrametime() }} ms</Text>
-        <Button id="consoleSwitch" onClick="switchConsole()">Open Console</Button>
+        <Button id="consoleSwitch" onClick="switchConsole()">
+            <Text>Open Console</Text>
+        </Button>
     </List>
-    <List id="sideBar" direction="column">
+    <List id="sideBar">
         <Text id="sidebarTitle">Outliner</Text>
         <List
             id="sidebarContent"
-            direction="column"
             items="actors"
             itemGetter="showActor"
         >
         </List>
     </List>
-    <List id="bottomBar" direction="column">
+    <List id="bottomBar">
         <Text id="bottomBarTitle">Content Browser</Text>
         <List
             id="dirHistory"
-            direction="row"
             items="directoryHistory"
             itemGetter="showDirectoryHistory"
         >
         </List>
         <Grid
             id="dirContent"
-            item-width="18vh"
-            item-height="49px"
             items="directoryInfo"
+            itemWidth="18vh"
+            itemHeight="5vw"
             itemGetter="showDirectory"
         >
         </Grid>

@@ -90,7 +90,6 @@ namespace Factory
         // Renderpass
         std::vector<vk::ClearValue> clearValues;
         clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
-        clearValues.push_back(vk::ClearDepthStencilValue(1.0f, 0));
 
         vk::RenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.renderPass          = m_graphicsPipeline->renderPass;
@@ -171,13 +170,12 @@ namespace Factory
         Chicane::GraphicsPipeline::CreateInfo createInfo = {};
         createInfo.canOverwrite         = false;
         createInfo.hasVertices          = true;
-        createInfo.hasDepth             = true;
+        createInfo.hasDepth             = false;
         createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
         createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
         createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
         createInfo.swapChainExtent      = m_rendererInternals.swapchain->extent;
         createInfo.swapChainImageFormat = m_rendererInternals.swapchain->format;
-        createInfo.depthFormat          = m_rendererInternals.swapchain->depthFormat;
         createInfo.descriptorSetLayouts = { m_frameDescriptor.setLayout };
 
         m_graphicsPipeline = std::make_unique<Chicane::GraphicsPipeline::Instance>(createInfo);
@@ -198,7 +196,6 @@ namespace Factory
             framebufferCreateInfo.renderPass      = m_graphicsPipeline->renderPass;
             framebufferCreateInfo.swapChainExtent = m_rendererInternals.swapchain->extent;
             framebufferCreateInfo.attachments.push_back(frame.imageView);
-            framebufferCreateInfo.attachments.push_back(frame.depth.imageView);
 
             Chicane::Frame::Buffer::init(frame, framebufferCreateInfo);
         }
