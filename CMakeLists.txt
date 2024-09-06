@@ -78,7 +78,9 @@ target_link_libraries(
 )
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_options(${EDITOR_TARGET_NAME} PRIVATE -mwindows)
+    if (WIN32)
+        target_link_options(${EDITOR_TARGET_NAME} PRIVATE -mwindows)
+    endif()
 endif()
 
 ##############  Set compiler  #######################
