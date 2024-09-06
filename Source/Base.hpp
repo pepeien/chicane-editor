@@ -13,7 +13,7 @@ public:
         : Chicane::Actor(),
         m_mesh(std::make_unique<Chicane::MeshComponent>())
     {
-        setCanTick(true);
+        setCanTick(false);
 
         m_mesh->attachTo(this);
         m_mesh->setMesh(inMesh);
