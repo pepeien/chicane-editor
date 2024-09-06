@@ -77,6 +77,10 @@ target_link_libraries(
         Chicane::Runtime
 )
 
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_options(${EDITOR_TARGET_NAME} PRIVATE -mwindows)
+endif()
+
 ##############  Set compiler  #######################
 if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
     if (NOT MINGW_PATH) 
@@ -101,6 +105,8 @@ if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
                 ${MINGW_PATH}/lib
         )
     endif()
+
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 ##############  Add subdirectories  #######################
