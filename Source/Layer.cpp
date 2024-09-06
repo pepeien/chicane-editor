@@ -177,6 +177,7 @@ namespace Factory
         createInfo.swapChainExtent      = m_rendererInternals.swapchain->extent;
         createInfo.swapChainImageFormat = m_rendererInternals.swapchain->format;
         createInfo.descriptorSetLayouts = { m_frameDescriptor.setLayout };
+        createInfo.polygonMode          = vk::PolygonMode::eFill;
 
         m_graphicsPipeline = std::make_unique<Chicane::GraphicsPipeline::Instance>(createInfo);
     }
@@ -188,7 +189,7 @@ namespace Factory
             return;
         }
 
-        for (Chicane::Frame::Instance& frame : m_rendererInternals.swapchain->images)
+        for (Chicane::Frame::Instance& frame : m_rendererInternals.swapchain->frames)
         {
             Chicane::Frame::Buffer::CreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.id              = m_id;
@@ -209,7 +210,7 @@ namespace Factory
         }
 
         Chicane::Descriptor::PoolCreateInfo descriptorPoolCreateInfo;
-        descriptorPoolCreateInfo.size  = static_cast<uint32_t>(m_rendererInternals.swapchain->images.size());
+        descriptorPoolCreateInfo.size  = static_cast<uint32_t>(m_rendererInternals.swapchain->frames.size());
         descriptorPoolCreateInfo.types.push_back(vk::DescriptorType::eUniformBuffer);
 
         Chicane::Descriptor::initPool(
@@ -218,7 +219,7 @@ namespace Factory
             descriptorPoolCreateInfo
         );
 
-        for (Chicane::Frame::Instance& frame : m_rendererInternals.swapchain->images)
+        for (Chicane::Frame::Instance& frame : m_rendererInternals.swapchain->frames)
         {
             // Scene
             vk::DescriptorSet sceneDescriptorSet;
