@@ -270,7 +270,7 @@ namespace Factory
                     Chicane::Vec<3, float>(
                         std::rand() % 100,
                         std::rand() % 100,
-                        std::rand() % 10
+                        std::rand() % 100
                     )
                 );
 

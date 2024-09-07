@@ -67,7 +67,7 @@
 
 #sidebarTitle {
     margin-top: 1vh;
-    height: 2vh;
+    height: 3vh;
 }
 
 #sidebarTitleText {
