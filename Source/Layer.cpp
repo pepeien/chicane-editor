@@ -223,7 +223,7 @@ namespace Factory
         {
             // Scene
             vk::DescriptorSet sceneDescriptorSet;
-            Chicane::Descriptor::initSet(
+            Chicane::Descriptor::allocalteSetLayout(
                 sceneDescriptorSet,
                 m_rendererInternals.logicalDevice,
                 m_frameDescriptor.setLayout,
