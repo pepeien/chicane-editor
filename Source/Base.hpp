@@ -12,7 +12,7 @@ class MeshActor : public Chicane::Actor
 public:
     MeshActor(const std::string& inMesh)
         : Chicane::Actor(),
-        m_meshComponent(std::make_unique<Chicane::MeshComponent>())
+        m_meshComponent(new Chicane::MeshComponent())
     {
         m_meshComponent->attachTo(this);
         m_meshComponent->setMesh(inMesh);
@@ -20,5 +20,5 @@ public:
     }
 
 private:
-    std::unique_ptr<Chicane::MeshComponent> m_meshComponent;
+    Chicane::MeshComponent* m_meshComponent;
 };
