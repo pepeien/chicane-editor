@@ -31,14 +31,16 @@ namespace Factory
         void refreshViewport();
 
     private:
-        Chicane::Renderer::Internals m_rendererInternals;
+        Chicane::Renderer::Internals                         m_rendererInternals;
 
         std::unique_ptr<Chicane::GraphicsPipeline::Instance> m_graphicsPipeline;
 
-        vk::DescriptorSet m_descriptorSet;
-        Chicane::Descriptor::Bundle m_frameDescriptor;
-        Chicane::Buffer::Instance m_vertexBuffer;
+        vk::DescriptorSet                                    m_descriptorSet;
+        Chicane::Descriptor::Bundle                          m_frameDescriptor;
+        Chicane::Buffer::Instance                            m_vertexBuffer;
 
-        Chicane::Vec<2, std::uint32_t> m_viewport;
+        Chicane::Vec<2, std::uint32_t>                       m_viewport;
+
+        std::vector<vk::ClearValue>                          m_clearValues;
     };
 }

@@ -5,36 +5,20 @@
 #include "Chicane/Game.hpp"
 #include "Chicane/Grid.hpp"
 #include "Chicane/Renderer.hpp"
+#include "Chicane/Game/Actor/Component/Mesh.hpp"
 
 class MeshActor : public Chicane::Actor
 {
 public:
     MeshActor(const std::string& inMesh)
         : Chicane::Actor(),
-        m_mesh(std::make_unique<Chicane::MeshComponent>()),
-        m_rotationSpeed(
-            Chicane::Vec<3, float>(
-                (std::rand() % 10) * 0.05f,
-                (std::rand() % 10) * 0.05f,
-                (std::rand() % 10) * 0.05f
-            )
-        )
+        m_meshComponent(std::make_unique<Chicane::MeshComponent>())
     {
-        setCanTick(true);
-
-        m_mesh->attachTo(this);
-        m_mesh->setMesh(inMesh);
-        m_mesh->activate();
-    }
-
-public:
-    void onTick(float inDelta) override
-    {
-        setRelativeRotation(m_rotationSpeed);
+        m_meshComponent->attachTo(this);
+        m_meshComponent->setMesh(inMesh);
+        m_meshComponent->activate();
     }
 
 private:
-    std::unique_ptr<Chicane::MeshComponent> m_mesh;
-
-    Chicane::Vec<3, float> m_rotationSpeed;
+    std::unique_ptr<Chicane::MeshComponent> m_meshComponent;
 };

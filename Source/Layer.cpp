@@ -4,8 +4,11 @@ namespace Factory
 {
     Layer::Layer(Chicane::Window* inWindow)
         : Chicane::Layer("Editor"),
-        m_rendererInternals(inWindow->getRendererInternals())
+        m_rendererInternals(inWindow->getRendererInternals()),
+        m_clearValues({})
     {
+        m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
+
         m_isInitialized = true;
     }
 
@@ -87,55 +90,36 @@ namespace Factory
             return;
         }
 
-        // Renderpass
-        std::vector<vk::ClearValue> clearValues;
-        clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
-
         vk::RenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.renderPass          = m_graphicsPipeline->renderPass;
         renderPassBeginInfo.framebuffer         = outFrame.getFramebuffer(m_id);
         renderPassBeginInfo.renderArea.offset.x = 0;
         renderPassBeginInfo.renderArea.offset.y = 0;
         renderPassBeginInfo.renderArea.extent   = inSwapChainExtent;
-        renderPassBeginInfo.clearValueCount     = static_cast<uint32_t>(clearValues.size());
-        renderPassBeginInfo.pClearValues        = clearValues.data();
+        renderPassBeginInfo.clearValueCount     = static_cast<uint32_t>(m_clearValues.size());
+        renderPassBeginInfo.pClearValues        = m_clearValues.data();
 
         inCommandBuffer.beginRenderPass(
             &renderPassBeginInfo,
             vk::SubpassContents::eInline
         );
+            inCommandBuffer.bindPipeline(
+                vk::PipelineBindPoint::eGraphics,
+                m_graphicsPipeline->instance
+            );
+            inCommandBuffer.bindDescriptorSets(
+                vk::PipelineBindPoint::eGraphics,
+                m_graphicsPipeline->layout,
+                0,
+                outFrame.getDescriptorSet(m_id),
+                nullptr
+            );
 
-        // Preparing
-        inCommandBuffer.bindPipeline(
-            vk::PipelineBindPoint::eGraphics,
-            m_graphicsPipeline->instance
-        );
+            vk::Buffer vertexBuffers[] = { m_vertexBuffer.instance };
+            vk::DeviceSize offsets[]   = { 0 };
 
-        inCommandBuffer.bindDescriptorSets(
-            vk::PipelineBindPoint::eGraphics,
-            m_graphicsPipeline->layout,
-            0,
-            outFrame.getDescriptorSet(m_id),
-            nullptr
-        );
-
-        vk::Buffer vertexBuffers[] = { m_vertexBuffer.instance };
-        vk::DeviceSize offsets[]   = { 0 };
-
-        inCommandBuffer.bindVertexBuffers(
-            0,
-            1,
-            vertexBuffers,
-            offsets
-        );
-
-        inCommandBuffer.draw(
-            6,
-            1,
-            0,
-            0
-        );
-
+            inCommandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offsets);
+            inCommandBuffer.draw(6, 1, 0, 0);
         inCommandBuffer.endRenderPass();
     }
 

@@ -265,16 +265,7 @@ namespace Factory
         {
             props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
             {
-                MeshActor* actor = new MeshActor(inItem.path);
-                actor->setAbsoluteTranslation(
-                    Chicane::Vec<3, float>(
-                        std::rand() % 100,
-                        std::rand() % 100,
-                        std::rand() % 100
-                    )
-                );
-
-                Chicane::addActor(actor);
+                Chicane::addActor(new MeshActor(inItem.path));
 
                 return 0;
             };
