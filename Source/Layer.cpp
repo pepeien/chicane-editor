@@ -9,12 +9,12 @@ namespace Factory
     {
         m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
 
-        m_isInitialized = true;
+        m_bIsInitialized = true;
     }
 
     Layer::~Layer()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -38,7 +38,7 @@ namespace Factory
 
     void Layer::build()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -54,7 +54,7 @@ namespace Factory
 
     void Layer::destroy()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -68,7 +68,7 @@ namespace Factory
 
     void Layer::rebuild()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -85,7 +85,7 @@ namespace Factory
         const vk::Extent2D& inSwapChainExtent
     )
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -125,7 +125,7 @@ namespace Factory
 
     void Layer::initFrameDescriptorSetLayout()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -146,15 +146,15 @@ namespace Factory
 
     void Layer::initGraphicsPipeline()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
 
         Chicane::GraphicsPipeline::CreateInfo createInfo = {};
-        createInfo.canOverwrite         = true;
-        createInfo.hasVertices          = true;
-        createInfo.hasDepth             = false;
+        createInfo.bCanOverwrite         = true;
+        createInfo.bHasVertices          = true;
+        createInfo.bHasDepth             = false;
         createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
         createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
         createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
@@ -168,7 +168,7 @@ namespace Factory
 
     void Layer::initFramebuffers()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }
@@ -188,7 +188,7 @@ namespace Factory
 
     void Layer::initFrameResources()
     {
-        if (!m_isInitialized)
+        if (!m_bIsInitialized)
         {
             return;
         }

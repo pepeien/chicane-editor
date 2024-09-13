@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     }
     catch (const std::exception& e)
     {
-        LOG_CRITICAL(e.what());
+        Chicane::Log::critical(e.what());
 
         return EXIT_FAILURE;
     }
