@@ -10,124 +10,27 @@ namespace Factory
             "home",
             "Content/View/Home.grid"
         ),
-        m_isConsoleOpen(std::make_any<std::string>("false")),
-        m_currentDirectory("")
+        m_uiActorTranslationX(std::make_any<std::string>("0.0")),
+        m_uiActorTranslationY(std::make_any<std::string>("0.0")),
+        m_uiActorTranslationZ(std::make_any<std::string>("0.0")),
+        m_uiActorRotationX(std::make_any<std::string>("0.0")),
+        m_uiActorRotationY(std::make_any<std::string>("0.0")),
+        m_uiActorRotationZ(std::make_any<std::string>("0.0")),
+        m_uiActorScalingX(std::make_any<std::string>("1.0")),
+        m_uiActorScalingY(std::make_any<std::string>("1.0")),
+        m_uiActorScalingZ(std::make_any<std::string>("1.0")),
+        m_uiIsConsoleOpen(std::make_any<std::string>("false")),
+        m_currentDirectory(""),
+        m_selectedActor(nullptr)
     {
-        Chicane::Log::watchLogs(
-            [this](const Chicane::Log::List& inLogs)
-            {
-                std::vector<std::any> logs;
+        setupWatchers();
 
-                for (const Chicane::Log::Instance& log : inLogs)
-                {
-                    logs.push_back(std::make_any<Chicane::Log::Instance>(log));
-                }
-
-                m_consoleLogs = std::make_any<std::vector<std::any>>(logs);
-            }
-        );
-        Chicane::watchActiveLevel(
-            [this](Chicane::Level* inLevel)
-            {
-                if (!inLevel)
-                {
-                    updateOutline();
-                }
-
-                inLevel->watchActors(
-                    [this](Chicane::Actor* inActor)
-                    {
-                        updateOutline();
-                    }
-                );
-            }
-        );
+        setupUiTelemetry();
+        setupUiActor();
+        setupUiDirectory();
+        setupUiConsole();
 
         listDir(".");
-
-        addVariable(
-            "consoleLogs",
-            &m_consoleLogs
-        );
-        addVariable(
-            "actors",
-            &m_actors
-        );
-        addVariable(
-            "directoryHistory",
-            &m_directoryHistory
-        );
-        addVariable(
-            "directoryInfo",
-            &m_directoryInfo
-        );
-        addVariable(
-            "isConsoleOpen",
-            &m_isConsoleOpen
-        );
-
-        addFunction(
-            "getFPS",
-            std::bind(&HomeView::getFPS, this, std::placeholders::_1)
-        );
-        addFunction(
-            "getFrametime",
-            std::bind(&HomeView::getFrametime, this, std::placeholders::_1)
-        );
-        addFunction(
-            "showConsole",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                m_isConsoleOpen = std::make_any<std::string>("true");
-
-                return 0;
-            }
-        );
-        addFunction(
-            "hideConsole",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                m_isConsoleOpen = std::make_any<std::string>("false");
-
-                return 0;
-            }
-        );
-        addFunction(
-            "showLog",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                showLog(std::any_cast<Chicane::Log::Instance>(inEvent.values[0]));
-
-                return 0;
-            }
-        );
-        addFunction(
-            "showActor",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                showActor(std::any_cast<std::string>(inEvent.values[0]));
-
-                return 0;
-            }
-        );
-        addFunction(
-            "showDirectoryHistory",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                showDirectoryHistory(std::any_cast<std::string>(inEvent.values[0]));
-
-                return 0;
-            }
-        );
-        addFunction(
-            "showDirectory",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
-            {
-                showDirectory(std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]));
-
-                return 0;
-            }
-        );
     }
 
     std::uint32_t HomeView::getFPS(const Chicane::Grid::ComponentEvent& inEvent)
@@ -155,26 +58,38 @@ namespace Factory
         Chicane::Grid::TextComponent::compileRaw(inLog.text, style);
     }
 
-    void HomeView::showActor(const std::string& inActor)
+    void HomeView::showActor(Chicane::Actor* inActor)
     {
-        Chicane::Grid::ContainerComponent::Props props {};
-        props.id           = "outlineWrapper-" + inActor;
-        props.style.width  = Chicane::Grid::getSize("100%");
-        props.style.height = Chicane::Grid::getSize("2vh");
+        if (!inActor)
+        {
+            return;
+        }
+
+        Chicane::Grid::ButtonComponent::Props props {};
+        props.id                    = Chicane::Utils::sprint("%p", inActor);
+        props.style.width           = Chicane::Grid::getSize("100%");
+        props.style.height          = Chicane::Grid::getSize("4vh");
+        props.style.backgroundColor = "#444444";
+        props.onClick               = [&](const Chicane::Grid::ComponentEvent& inEvent)
+        {
+            m_selectedActor = inActor;
+
+            return 0;
+        };
         props._renderers.push_back(
-            [inActor](const Chicane::Grid::ComponentEvent& inEvent)
+            [&](const Chicane::Grid::ComponentEvent& inEvent)
             {
                 Chicane::Grid::Style style {};
                 style.horizontalAlignment = Chicane::Grid::Alignment::Center;
                 style.verticalAlignment   = Chicane::Grid::Alignment::Center;
 
-                Chicane::Grid::TextComponent::compileRaw(inActor, style);
+                Chicane::Grid::TextComponent::compileRaw(props.id, style);
 
                 return 0;
             }
         );
 
-        Chicane::Grid::ContainerComponent::compileRaw(props);
+        Chicane::Grid::ButtonComponent::compileRaw(props);
     }
 
     void HomeView::showDirectoryHistory(const std::string& inPath)
@@ -286,7 +201,271 @@ namespace Factory
         Chicane::Grid::ButtonComponent::compileRaw(props);
     }
 
-    void HomeView::updateOutline()
+    void HomeView::setupWatchers()
+    {
+        Chicane::Log::watchLogs(
+            [this](const Chicane::Log::List& inLogs)
+            {
+                std::vector<std::any> logs;
+
+                for (const Chicane::Log::Instance& log : inLogs)
+                {
+                    logs.push_back(std::make_any<Chicane::Log::Instance>(log));
+                }
+
+                m_uiConsoleLogs = std::make_any<std::vector<std::any>>(logs);
+            }
+        );
+        Chicane::watchActiveLevel(
+            [this](Chicane::Level* inLevel)
+            {
+                if (!inLevel)
+                {
+                    updateOutliner();
+                }
+
+                inLevel->watchActors(
+                    [this](Chicane::Actor* inActor)
+                    {
+                        updateOutliner();
+                    }
+                );
+            }
+        );
+    }
+
+    void HomeView::setupUiTelemetry()
+    {
+        // Functions
+        addFunction(
+            "getFPS",
+            std::bind(&HomeView::getFPS, this, std::placeholders::_1)
+        );
+        addFunction(
+            "getFrametime",
+            std::bind(&HomeView::getFrametime, this, std::placeholders::_1)
+        );
+    }
+
+    void HomeView::setupUiActor()
+    {
+        // Variables
+        addVariable(
+            "actors",
+            &m_uiActors
+        );
+        addVariable(
+            "actorTranslationX",
+            &m_uiActorTranslationX
+        );
+        addVariable(
+            "actorTranslationY",
+            &m_uiActorTranslationY
+        );
+        addVariable(
+            "actorTranslationZ",
+            &m_uiActorTranslationZ
+        );
+        addVariable(
+            "actorRotationX",
+            &m_uiActorRotationX
+        );
+        addVariable(
+            "actorRotationY",
+            &m_uiActorRotationY
+        );
+        addVariable(
+            "actorRotationZ",
+            &m_uiActorRotationZ
+        );
+        addVariable(
+            "actorScalingX",
+            &m_uiActorScalingX
+        );
+        addVariable(
+            "actorScalingY",
+            &m_uiActorScalingY
+        );
+        addVariable(
+            "actorScalingZ",
+            &m_uiActorScalingZ
+        );
+
+        // Functions
+        addFunction(
+            "showActor",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showActor(std::any_cast<Chicane::Actor*>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
+        addFunction(
+            "onTranslationChange",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                updateTranslation();
+
+                return 0;
+            }
+        );
+        addFunction(
+            "onRotationChange",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                updateRotation();
+
+                return 0;
+            }
+        );
+        addFunction(
+            "onScalingChange",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                updateScaling();
+
+                return 0;
+            }
+        );
+    }
+
+    void HomeView::setupUiDirectory()
+    {
+        // Variables
+        addVariable(
+            "directoryHistory",
+            &m_uiDirectoryHistory
+        );
+        addVariable(
+            "directoryInfo",
+            &m_uiDirectoryInfo
+        );
+
+        // Functions
+        addFunction(
+            "showDirectoryHistory",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showDirectoryHistory(std::any_cast<std::string>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
+        addFunction(
+            "showDirectory",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showDirectory(std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
+    }
+
+    void HomeView::setupUiConsole()
+    {
+        // Variables
+        addVariable(
+            "consoleLogs",
+            &m_uiConsoleLogs
+        );
+        addVariable(
+            "isConsoleOpen",
+            &m_uiIsConsoleOpen
+        );
+
+        // Functions
+        addFunction(
+            "showConsole",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                m_uiIsConsoleOpen = std::make_any<std::string>("true");
+
+                return 0;
+            }
+        );
+        addFunction(
+            "hideConsole",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                m_uiIsConsoleOpen = std::make_any<std::string>("false");
+
+                return 0;
+            }
+        );
+        addFunction(
+            "showLog",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                showLog(std::any_cast<Chicane::Log::Instance>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
+    }
+
+    void HomeView::updateTranslation()
+    {
+        if (!m_selectedActor)
+        {
+            return;
+        }
+
+        std::string x = std::any_cast<std::string>(m_uiActorTranslationX);
+        std::string y = std::any_cast<std::string>(m_uiActorTranslationY);
+        std::string z = std::any_cast<std::string>(m_uiActorTranslationZ);
+
+        m_selectedActor->setAbsoluteTranslation(
+            Chicane::Vec<3, float>(
+                x.empty() ? 0.0f : std::stof(x),
+                y.empty() ? 0.0f : std::stof(y),
+                z.empty() ? 0.0f : std::stof(z)
+            )
+        );
+    }
+
+    void HomeView::updateRotation()
+    {
+        if (!m_selectedActor)
+        {
+            return;
+        }
+
+        std::string x = std::any_cast<std::string>(m_uiActorRotationX);
+        std::string y = std::any_cast<std::string>(m_uiActorRotationY);
+        std::string z = std::any_cast<std::string>(m_uiActorRotationZ);
+
+        m_selectedActor->setAbsoluteRotation(
+            Chicane::Vec<3, float>(
+                x.empty() ? 0.0f : std::stof(x),
+                y.empty() ? 0.0f : std::stof(y),
+                z.empty() ? 0.0f : std::stof(z)
+            )
+        );
+    }
+
+    void HomeView::updateScaling()
+    {
+        if (!m_selectedActor)
+        {
+            return;
+        }
+
+        std::string x = std::any_cast<std::string>(m_uiActorScalingX);
+        std::string y = std::any_cast<std::string>(m_uiActorScalingY);
+        std::string z = std::any_cast<std::string>(m_uiActorScalingZ);
+
+        m_selectedActor->setAbsoluteScale(
+            Chicane::Vec<3, float>(
+                x.empty() ? 1.0f : std::stof(x),
+                y.empty() ? 1.0f : std::stof(y),
+                z.empty() ? 1.0f : std::stof(z)
+            )
+        );
+    }
+
+    void HomeView::updateOutliner()
     {
         std::unordered_map<std::string, std::uint32_t> ids {};
 
@@ -294,30 +473,10 @@ namespace Factory
 
         for (Chicane::Actor* actor : Chicane::getActors())
         {
-            std::vector<std::string> splittedId = Chicane::Utils::split(
-                typeid(*actor).name(),
-                ':'
-            );
-            std::string id = splittedId.back();
-
-            if (ids.find(id) == ids.end())
-            {
-                ids.insert(
-                    std::make_pair(
-                        id,
-                        -1
-                    )
-                );
-            }
-
-            ids.at(id)++;
-
-            actors.push_back(
-                std::make_any<std::string>(id + "-" + std::to_string(ids.at(id)))
-            );
+            actors.push_back(std::make_any<Chicane::Actor*>(actor));
         }
 
-        m_actors = std::make_any<std::vector<std::any>>(actors);
+        m_uiActors = std::make_any<std::vector<std::any>>(actors);
     }
 
     void HomeView::updateDirHistory()
@@ -344,7 +503,7 @@ namespace Factory
             );
         }
 
-        m_directoryHistory = std::make_any<std::vector<std::any>>(items);
+        m_uiDirectoryHistory = std::make_any<std::vector<std::any>>(items);
     }
 
     void HomeView::listDir(const std::string& inPath)
@@ -374,7 +533,7 @@ namespace Factory
             );
         }
 
-        m_directoryInfo = std::make_any<std::vector<std::any>>(items);
+        m_uiDirectoryInfo = std::make_any<std::vector<std::any>>(items);
 
         m_currentDirectory = inPath;
 

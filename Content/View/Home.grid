@@ -25,11 +25,94 @@
         </Button>
     </Container>
     <Container id="sideBar">
-        <Container id="sidebarTitle">
-            <Text id="sidebarTitleText">Outliner</Text>
+        <Container id="detailsTitle">
+            <Text id="detailsTitleText">Details</Text>
+        </Container>
+        <Container id="detailsContent">
+            <Container id="translationDetail">
+                <Text id="translationDetailTitle">Translation</Text>
+                <Container id="translationDetailInputs">
+                    <TextInput
+                        id="translationX"
+                        label="X"
+                        value="actorTranslationX"
+                        onInput="onTranslationChange()"
+                    >
+                    </TextInput>
+                    <TextInput
+                        id="translationY"
+                        label="Y"
+                        value="actorTranslationY"
+                        onInput="onTranslationChange()"
+                    >
+                    </TextInput>
+                    <TextInput
+                        id="translationZ"
+                        label="Z"
+                        value="actorTranslationZ"
+                        onInput="onTranslationChange()"
+                    >
+                    </TextInput>
+                </Container>
+            </Container>
+            <Container id="rotationDetail">
+                <Text id="rotationDetailTitle">Rotation</Text>
+                <Container id="rotationDetailInputs">
+                    <TextInput
+                        id="rotationX"
+                        label="X"
+                        value="actorRotationX"
+                        onInput="onRotationChange()"
+                    >
+                    </TextInput>
+                    <TextInput
+                        id="rotationY"
+                        label="Y"
+                        value="actorRotationY"
+                        onInput="onRotationChange()"
+                    >
+                    </TextInput>
+                    <TextInput
+                        id="rotationZ"
+                        label="Z"
+                        value="actorRotationZ"
+                        onInput="onRotationChange()"
+                    >
+                    </TextInput>
+                </Container>
+            </Container>
+            <Container id="scalingDetail">
+                <Text id="scalingDetailTitle">Scaling</Text>
+                <Container id="scalingDetailInputs">
+                    <TextInput
+                        id="scalingX"
+                        label="X"
+                        value="actorScalingX"
+                        onInput="onScalingChange()"
+                    >
+                    </TextInput>
+                    <TextInput
+                        id="scalingY"
+                        label="Y"
+                        value="actorScalingY"
+                        onInput="onScalingChange()"
+                    >
+                    </TextInput>
+                    <TextInput
+                        id="scalingZ"
+                        label="Z"
+                        value="actorScalingZ"
+                        onInput="onScalingChange()"
+                    >
+                    </TextInput>
+                </Container>
+            </Container>
+        </Container>
+        <Container id="outlinerTitle">
+            <Text id="outlinerTitleText">Outliner</Text>
         </Container>
         <Container
-            id="sidebarContent"
+            id="outlinerContent"
             items="actors"
             itemGetter="showActor"
         >
