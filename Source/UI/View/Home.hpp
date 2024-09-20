@@ -36,15 +36,10 @@ namespace Factory
     private:
         // Render
         std::any m_uiActors;
-        std::any m_uiActorTranslationX;
-        std::any m_uiActorTranslationY;
-        std::any m_uiActorTranslationZ;
-        std::any m_uiActorRotationX;
-        std::any m_uiActorRotationY;
-        std::any m_uiActorRotationZ;
-        std::any m_uiActorScalingX;
-        std::any m_uiActorScalingY;
-        std::any m_uiActorScalingZ;
+        std::any m_uiSelectedActor;
+        std::vector<std::any> m_uiActorTranslation;
+        std::vector<std::any> m_uiActorRotation;
+        std::vector<std::any> m_uiActorScaling;
 
         std::any m_uiDirectoryHistory;
         std::any m_uiDirectoryInfo;

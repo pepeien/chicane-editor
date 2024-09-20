@@ -10,19 +10,26 @@ namespace Factory
             "home",
             "Content/View/Home.grid"
         ),
-        m_uiActorTranslationX(std::make_any<std::string>("0.0")),
-        m_uiActorTranslationY(std::make_any<std::string>("0.0")),
-        m_uiActorTranslationZ(std::make_any<std::string>("0.0")),
-        m_uiActorRotationX(std::make_any<std::string>("0.0")),
-        m_uiActorRotationY(std::make_any<std::string>("0.0")),
-        m_uiActorRotationZ(std::make_any<std::string>("0.0")),
-        m_uiActorScalingX(std::make_any<std::string>("1.0")),
-        m_uiActorScalingY(std::make_any<std::string>("1.0")),
-        m_uiActorScalingZ(std::make_any<std::string>("1.0")),
+        m_uiSelectedActor(std::make_any<std::string>("")),
         m_uiIsConsoleOpen(std::make_any<std::string>("false")),
         m_currentDirectory(""),
         m_selectedActor(nullptr)
     {
+        m_uiActorTranslation.resize(3);
+        m_uiActorTranslation[0] = std::make_any<std::string>("0.0");
+        m_uiActorTranslation[1] = std::make_any<std::string>("0.0");
+        m_uiActorTranslation[2] = std::make_any<std::string>("0.0");
+
+        m_uiActorRotation.resize(3);
+        m_uiActorRotation[0] = std::make_any<std::string>("0.0");
+        m_uiActorRotation[1] = std::make_any<std::string>("0.0");
+        m_uiActorRotation[2] = std::make_any<std::string>("0.0");
+
+        m_uiActorScaling.resize(3);
+        m_uiActorScaling[0] = std::make_any<std::string>("1.0");
+        m_uiActorScaling[1] = std::make_any<std::string>("1.0");
+        m_uiActorScaling[2] = std::make_any<std::string>("1.0");
+
         setupWatchers();
 
         setupUiTelemetry();
@@ -73,6 +80,22 @@ namespace Factory
         props.onClick               = [&](const Chicane::Grid::ComponentEvent& inEvent)
         {
             m_selectedActor = inActor;
+
+            const Chicane::Transform& transform = inActor->getTransform();
+
+            m_uiActorTranslation[0] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.translation.x));
+            m_uiActorTranslation[1] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.translation.y));
+            m_uiActorTranslation[2] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.translation.z));
+
+            m_uiActorRotation[0] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.rotation.x));
+            m_uiActorRotation[1] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.rotation.y));
+            m_uiActorRotation[2] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.rotation.z));
+
+            m_uiActorScaling[0] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.scale.x));
+            m_uiActorScaling[1] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.scale.y));
+            m_uiActorScaling[2] = std::make_any<std::string>(Chicane::Utils::sprint("%.2f", transform.scale.z));
+
+            m_uiSelectedActor = std::make_any<std::string>(props.id);
 
             return 0;
         };
@@ -255,40 +278,44 @@ namespace Factory
             &m_uiActors
         );
         addVariable(
+            "selectedActor",
+            &m_uiSelectedActor
+        );
+        addVariable(
             "actorTranslationX",
-            &m_uiActorTranslationX
+            &m_uiActorTranslation[0]
         );
         addVariable(
             "actorTranslationY",
-            &m_uiActorTranslationY
+            &m_uiActorTranslation[1]
         );
         addVariable(
             "actorTranslationZ",
-            &m_uiActorTranslationZ
+            &m_uiActorTranslation[2]
         );
         addVariable(
             "actorRotationX",
-            &m_uiActorRotationX
+            &m_uiActorRotation[0]
         );
         addVariable(
             "actorRotationY",
-            &m_uiActorRotationY
+            &m_uiActorRotation[1]
         );
         addVariable(
             "actorRotationZ",
-            &m_uiActorRotationZ
+            &m_uiActorRotation[2]
         );
         addVariable(
             "actorScalingX",
-            &m_uiActorScalingX
+            &m_uiActorScaling[0]
         );
         addVariable(
             "actorScalingY",
-            &m_uiActorScalingY
+            &m_uiActorScaling[1]
         );
         addVariable(
             "actorScalingZ",
-            &m_uiActorScalingZ
+            &m_uiActorScaling[2]
         );
 
         // Functions
@@ -412,9 +439,9 @@ namespace Factory
             return;
         }
 
-        std::string x = std::any_cast<std::string>(m_uiActorTranslationX);
-        std::string y = std::any_cast<std::string>(m_uiActorTranslationY);
-        std::string z = std::any_cast<std::string>(m_uiActorTranslationZ);
+        std::string x = std::any_cast<std::string>(m_uiActorTranslation[0]);
+        std::string y = std::any_cast<std::string>(m_uiActorTranslation[1]);
+        std::string z = std::any_cast<std::string>(m_uiActorTranslation[2]);
 
         m_selectedActor->setAbsoluteTranslation(
             Chicane::Vec<3, float>(
@@ -432,9 +459,9 @@ namespace Factory
             return;
         }
 
-        std::string x = std::any_cast<std::string>(m_uiActorRotationX);
-        std::string y = std::any_cast<std::string>(m_uiActorRotationY);
-        std::string z = std::any_cast<std::string>(m_uiActorRotationZ);
+        std::string x = std::any_cast<std::string>(m_uiActorRotation[0]);
+        std::string y = std::any_cast<std::string>(m_uiActorRotation[1]);
+        std::string z = std::any_cast<std::string>(m_uiActorRotation[2]);
 
         m_selectedActor->setAbsoluteRotation(
             Chicane::Vec<3, float>(
@@ -452,9 +479,9 @@ namespace Factory
             return;
         }
 
-        std::string x = std::any_cast<std::string>(m_uiActorScalingX);
-        std::string y = std::any_cast<std::string>(m_uiActorScalingY);
-        std::string z = std::any_cast<std::string>(m_uiActorScalingZ);
+        std::string x = std::any_cast<std::string>(m_uiActorScaling[0]);
+        std::string y = std::any_cast<std::string>(m_uiActorScaling[1]);
+        std::string z = std::any_cast<std::string>(m_uiActorScaling[2]);
 
         m_selectedActor->setAbsoluteScale(
             Chicane::Vec<3, float>(

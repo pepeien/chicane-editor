@@ -67,8 +67,9 @@
 }
 
 #detailsTitle, #outlinerTitle {
+    list-direction: column;
     margin-top: 1vh;
-    height: 3vh;
+    height: 4vh;
 }
 
 #detailsTitleText, #outlinerTitleText {
@@ -78,7 +79,7 @@
 #detailsContent, #outlinerContent {
     list-direction: column;
     width: 100%;
-    height: 43.5vh;
+    height: 42.5vh;
     margin-top: 1vh;
     background-color: #525252;
     gap: 1vh 0;

@@ -27,6 +27,7 @@
     <Container id="sideBar">
         <Container id="detailsTitle">
             <Text id="detailsTitleText">Details</Text>
+            <Text id="detailsTitleText">{{ selectedActor }}</Text>
         </Container>
         <Container id="detailsContent">
             <Container id="translationDetail">
