@@ -3,6 +3,18 @@
 #include "Base.hpp"
 #include "Chicane/Game/Actor/Component/Mesh.hpp"
 
+constexpr const SDL_DialogFileFilter m_modelFilters[] = {
+    { "All (.obj)", "obj" },
+    { "Wavefront (.obj)", "obj" },
+    { nullptr, nullptr }
+};
+
+constexpr const SDL_DialogFileFilter m_textureFilters[] = {
+    { "All (.jpg, .jpeg)", "jpg;jpeg" },
+    { "JPEG (.jpg, .jpeg)", "jpg;jpeg" },
+    { nullptr, nullptr }
+};
+
 namespace Factory
 {
     HomeView::HomeView()
@@ -35,6 +47,7 @@ namespace Factory
         setupUiTelemetry();
         setupUiActor();
         setupUiDirectory();
+        setupUiAssetCreator();
         setupUiConsole();
 
         listDir(".");
@@ -384,6 +397,71 @@ namespace Factory
             [this](const Chicane::Grid::ComponentEvent& inEvent)
             {
                 showDirectory(std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]));
+
+                return 0;
+            }
+        );
+    }
+
+    void HomeView::setupUiAssetCreator()
+    {
+        // Functions
+        addFunction(
+            "showModelCreator",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                Chicane::FileSystem::FileDialog props {};
+                props.title         = "Select 3D Model";
+                props.filters       = m_modelFilters;
+                props.filterCount   = 2;
+                props.canSelectMany = false;
+
+                Chicane::FileSystem::openFileDialog(
+                    props,
+                    [](void* inData, const char* const* inFiles, int inFilter)
+                    {
+                        const auto& result = Chicane::FileSystem::DialogResult::fromRaw(inFiles);
+
+                        for (const auto& model : result)
+                        {
+                            Chicane::Log::emmit(
+                                Chicane::Color::Lime,
+                                "MODEL",
+                                model.path.string()
+                            );
+                        }
+                    }
+                );
+
+                return 0;
+            }
+        );
+        addFunction(
+            "showTextureCreator",
+            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            {
+                Chicane::FileSystem::FileDialog props {};
+                props.title         = "Select a Texture Image";
+                props.filters       = m_textureFilters;
+                props.filterCount   = 2;
+                props.canSelectMany = false;
+
+                Chicane::FileSystem::openFileDialog(
+                    props,
+                    [](void* inData, const char* const* inFiles, int inFilter)
+                    {
+                        const auto& result = Chicane::FileSystem::DialogResult::fromRaw(inFiles);
+
+                        for (const auto& texture : result)
+                        {
+                            Chicane::Log::emmit(
+                                Chicane::Color::Orange,
+                                "TEXTURE",
+                                texture.path.string()
+                            );
+                        }
+                    }
+                );
 
                 return 0;
             }

@@ -24,6 +24,7 @@ namespace Factory
         void setupUiTelemetry();
         void setupUiActor();
         void setupUiDirectory();
+        void setupUiAssetCreator();
         void setupUiConsole();
 
         void updateTranslation();

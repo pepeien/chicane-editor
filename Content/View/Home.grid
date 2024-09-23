@@ -1,18 +1,16 @@
 <View id="home" style="Content/View/Home.decal">
     <Popup id="console" isOpen="{{ isConsoleOpen }}">
-        <Container id="consoleWrapper">
-            <Container id="consoleHeader">
-                <Text id="consoleHeaderText">Console</Text>
-                <Button id="consoleClose" onClick="hideConsole()">
-                    <Text id="consoleCloseText">X</Text>
-                </Button>
-            </Container>
-            <Container
-                id="consoleLog"
-                items="consoleLogs"
-                itemGetter="showLog"
-            >
-            </Container>
+        <Container id="consoleHeader">
+            <Text id="consoleHeaderText">Console</Text>
+            <Button id="consoleClose" onClick="hideConsole()">
+                <Text id="consoleCloseText">X</Text>
+            </Button>
+        </Container>
+        <Container
+            id="consoleLog"
+            items="consoleLogs"
+            itemGetter="showLog"
+        >
         </Container>
     </Popup>
     <Container id="viewport">
@@ -20,9 +18,17 @@
             <Text>{{ getFPS() }} FPS</Text>
             <Text>{{ getFrametime() }} ms</Text>
         </Container>
-        <Button id="consoleButton" onClick="showConsole()">
-            <Text id="consoleButtonText">Console</Text>
-        </Button>
+        <Container id="buttons">
+            <Button id="meshButton" onClick="showModelCreator()">
+                <Text id="meshButtonText">Create Model</Text>
+            </Button>
+            <Button id="textureButton" onClick="showTextureCreator()">
+                <Text id="textureButtonText">Create Texture</Text>
+            </Button>
+            <Button id="consoleButton" onClick="showConsole()">
+                <Text id="consoleButtonText">Console</Text>
+            </Button>
+        </Container>
     </Container>
     <Container id="sideBar">
         <Container id="detailsTitle">
