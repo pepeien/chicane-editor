@@ -16,8 +16,8 @@ namespace Factory
         Chicane::setActiveLevel(level.get());
 
         Chicane::CameraActor* character = new Chicane::CameraActor();
-        character->setAbsoluteTranslation(Chicane::Vec<3, float>(0.0f, -6.0f, 1.0f));
-        character->setAbsoluteRotation(Chicane::Vec<3, float>(0.0f, -10.0f, -25.0f));
+        character->setAbsoluteTranslation(Chicane::Vec<3, float>(-5.0f, -7.0f, 2.0f));
+        character->setAbsoluteRotation(Chicane::Vec<3, float>(0.0f, -34.5f, -12.5f));
         Chicane::addActor(character);
         Chicane::getActiveController()->attachTo(character);
 
