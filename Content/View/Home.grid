@@ -1,5 +1,5 @@
 <View id="home" style="Content/View/Home.decal">
-    <Popup id="console" isOpen="{{ isConsoleOpen }}">
+    <Popup id="console" isVisible="{{ isConsoleOpen }}">
         <Container id="consoleHeader">
             <Text id="consoleHeaderText">Console</Text>
             <Button id="consoleClose" onClick="hideConsole()">

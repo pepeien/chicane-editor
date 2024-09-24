@@ -422,14 +422,24 @@ namespace Factory
                     {
                         const auto& result = Chicane::FileSystem::DialogResult::fromRaw(inFiles);
 
-                        for (const auto& model : result)
+                        if (result.empty())
                         {
-                            Chicane::Log::emmit(
-                                Chicane::Color::Lime,
-                                "MODEL",
-                                model.path.string()
-                            );
+                            return;
                         }
+
+                        const auto& path = result.at(0).path;
+
+                        Chicane::Box::WriteEntry entry {};
+                        entry.type         = Chicane::Box::EntryType::Model;
+                        entry.dataFilePath = path.string();
+
+                        Chicane::Box::WriteInfo writeInfo {};
+                        writeInfo.type         = Chicane::Box::Type::Model;
+                        writeInfo.name         = path.filename().string();
+                        writeInfo.outputFolder = "Content/Models/";
+                        writeInfo.entries.push_back(entry);
+
+                        Chicane::Box::write(writeInfo);
                     }
                 );
 
@@ -452,14 +462,24 @@ namespace Factory
                     {
                         const auto& result = Chicane::FileSystem::DialogResult::fromRaw(inFiles);
 
-                        for (const auto& texture : result)
+                        if (result.empty())
                         {
-                            Chicane::Log::emmit(
-                                Chicane::Color::Orange,
-                                "TEXTURE",
-                                texture.path.string()
-                            );
+                            return;
                         }
+
+                        const auto& path = result.at(0).path;
+
+                        Chicane::Box::WriteEntry entry {};
+                        entry.type         = Chicane::Box::EntryType::Texture;
+                        entry.dataFilePath = result.at(0).path.string();
+
+                        Chicane::Box::WriteInfo writeInfo {};
+                        writeInfo.type         = Chicane::Box::Type::Texture;
+                        writeInfo.name         = path.filename().string();
+                        writeInfo.outputFolder = "Content/Textures/";
+                        writeInfo.entries.push_back(entry);
+
+                        Chicane::Box::write(writeInfo);
                     }
                 );
 
