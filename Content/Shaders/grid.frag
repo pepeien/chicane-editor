@@ -47,8 +47,6 @@ void main() {
     float floorDistance = -inNearPoint.z / (inFarPoint.z - inNearPoint.z);
 
     if (floorDistance < 0.0) {
-        outColor = vec4(0.0);
-
         return;
     }
 
@@ -59,6 +57,4 @@ void main() {
     outColor     = grid(position, 1.0, false);
     outColor    += grid(position, 10.0, true);
     outColor.a  *= max(0.0, (0.5 - computeLinearDepth(depth)));
-
-    gl_FragDepth = depth;
 }

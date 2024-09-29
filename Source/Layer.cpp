@@ -7,7 +7,7 @@ namespace Factory
         m_rendererInternals(inWindow->getRendererInternals()),
         m_clearValues({})
     {
-        m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
+        m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 0.0f));
 
         m_bIsInitialized = true;
     }
@@ -151,16 +151,26 @@ namespace Factory
             return;
         }
 
+        Chicane::GraphicsPipeline::Attachment colorAttachment {};
+        colorAttachment.format        = m_rendererInternals.swapchain->format;
+        colorAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
+        colorAttachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
+
+        Chicane::GraphicsPipeline::Attachment depthAttachment {};
+        depthAttachment.format        = m_rendererInternals.swapchain->depthFormat;
+        depthAttachment.loadOp        = vk::AttachmentLoadOp::eClear;
+        depthAttachment.initialLayout = vk::ImageLayout::eUndefined;
+
         Chicane::GraphicsPipeline::CreateInfo createInfo = {};
-        createInfo.bCanOverwrite         = true;
-        createInfo.bHasVertices          = true;
-        createInfo.bHasDepth             = false;
+        createInfo.bHasVertices         = true;
+        createInfo.bHasBlending         = true;
         createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
         createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
         createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
-        createInfo.swapChainExtent      = m_rendererInternals.swapchain->extent;
-        createInfo.swapChainImageFormat = m_rendererInternals.swapchain->format;
+        createInfo.extent               = m_rendererInternals.swapchain->extent;
         createInfo.descriptorSetLayouts = { m_frameDescriptor.setLayout };
+        createInfo.colorAttachment      = colorAttachment;
+        createInfo.depthAttachment      = depthAttachment;
         createInfo.polygonMode          = vk::PolygonMode::eFill;
 
         m_graphicsPipeline = std::make_unique<Chicane::GraphicsPipeline::Instance>(createInfo);
