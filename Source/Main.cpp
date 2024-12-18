@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     try
     {
-        Factory::run();
+        Editor::run();
     }
     catch (const std::exception& e)
     {

@@ -1,6 +1,6 @@
 #include "Layer.hpp"
 
-namespace Factory
+namespace Editor
 {
     Layer::Layer(Chicane::Window* inWindow)
         : Chicane::Layer("Editor"),

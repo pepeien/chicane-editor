@@ -3,7 +3,7 @@
 #include "Layer.hpp"
 #include "UI/View/Home.hpp"
 
-namespace Factory
+namespace Editor
 {
     void run()
     {

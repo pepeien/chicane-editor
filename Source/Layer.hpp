@@ -2,7 +2,7 @@
 
 #include "Base.hpp"
 
-namespace Factory
+namespace Editor
 {
     class Layer : public Chicane::Layer
     {

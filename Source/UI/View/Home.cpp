@@ -15,7 +15,7 @@ constexpr const SDL_DialogFileFilter m_textureFilters[] = {
     { nullptr, nullptr }
 };
 
-namespace Factory
+namespace Editor
 {
     HomeView::HomeView()
         : Chicane::Grid::View(
