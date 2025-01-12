@@ -7,7 +7,22 @@ namespace Editor
         m_rendererInternals(Chicane::Application::getRenderer<Chicane::Vulkan::Renderer>()->getInternals()),
         m_clearValues({})
     {
-        m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 0.0f));
+        m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
+        m_clearValues.push_back(vk::ClearDepthStencilValue(0.0f, 0));
+
+        Chicane::Loader::getModelManager()->watchChanges(
+            [this](Chicane::Manager::EventType inEvent)
+            {
+                if (inEvent != Chicane::Manager::EventType::Activation || !is(Chicane::Layer::Status::Offline))
+                {
+                    return;
+                }
+
+                setStatus(Chicane::Layer::Status::Initialized);
+
+                build();
+            }
+        );
     }
 
     Layer::~Layer()
@@ -31,6 +46,11 @@ namespace Editor
 
     void Layer::build()
     {
+        if (!is(Chicane::Layer::Status::Initialized))
+        {
+            return;
+        }
+
         initFrameDescriptorSetLayout();
         initGraphicsPipeline();
         initFramebuffers();
@@ -38,27 +58,48 @@ namespace Editor
         initVertexBuffers();
 
         refreshViewport();
+
+        setStatus(Chicane::Layer::Status::Running);
     }
 
     void Layer::destroy()
     {
+        if (!is(Chicane::Layer::Status::Running))
+        {
+            return;
+        }
+
         m_rendererInternals.logicalDevice.waitIdle();
 
         m_rendererInternals.logicalDevice.destroyDescriptorPool(
             m_frameDescriptor.pool
         );
+
+        setStatus(Chicane::Layer::Status::Offline);
     }
 
     void Layer::rebuild()
     {
+        if (!is(Chicane::Layer::Status::Offline))
+        {
+            return;
+        }
+
         initFramebuffers();
         initFrameResources();
 
         refreshViewport();
+
+        setStatus(Chicane::Layer::Status::Running);
     }
 
     void Layer::render(void* outData)
     {
+        if (!is(Chicane::Layer::Status::Running))
+        {
+            return;
+        }
+
         Chicane::Vulkan::Renderer::Data* data = (Chicane::Vulkan::Renderer::Data*) outData;
 
         vk::CommandBuffer& commandBuffer = data->commandBuffer;
@@ -115,26 +156,33 @@ namespace Editor
 
     void Layer::initGraphicsPipeline()
     {
+        std::vector<vk::AttachmentDescription> attachments {};
+
         Chicane::Vulkan::GraphicsPipeline::Attachment colorAttachment {};
         colorAttachment.format        = m_rendererInternals.swapchain->format;
         colorAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
         colorAttachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
+        colorAttachment.finalLayout   = vk::ImageLayout::ePresentSrcKHR;
 
         Chicane::Vulkan::GraphicsPipeline::Attachment depthAttachment {};
         depthAttachment.format        = m_rendererInternals.swapchain->depthFormat;
-        depthAttachment.loadOp        = vk::AttachmentLoadOp::eClear;
-        depthAttachment.initialLayout = vk::ImageLayout::eUndefined;
+        depthAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
+        depthAttachment.initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+        depthAttachment.finalLayout   = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
         Chicane::Vulkan::GraphicsPipeline::CreateInfo createInfo = {};
         createInfo.bHasVertices         = true;
+        createInfo.bHasDepthWrite       = false;
         createInfo.bHasBlending         = true;
         createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
         createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
         createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
         createInfo.extent               = m_rendererInternals.swapchain->extent;
         createInfo.descriptorSetLayouts = { m_frameDescriptor.setLayout };
-        createInfo.colorAttachment      = colorAttachment;
-        createInfo.depthAttachment      = depthAttachment;
+        createInfo.attachments           = {
+            Chicane::Vulkan::GraphicsPipeline::createColorAttachment(colorAttachment),
+            Chicane::Vulkan::GraphicsPipeline::createDepthAttachment(depthAttachment)
+        };
         createInfo.polygonMode          = vk::PolygonMode::eFill;
 
         m_graphicsPipeline = std::make_unique<Chicane::Vulkan::GraphicsPipeline::Instance>(createInfo);
@@ -144,14 +192,15 @@ namespace Editor
     {
         for (Chicane::Vulkan::Frame::Instance& frame : m_rendererInternals.swapchain->frames)
         {
-            Chicane::Vulkan::Frame::Buffer::CreateInfo framebufferCreateInfo = {};
-            framebufferCreateInfo.id              = m_id;
-            framebufferCreateInfo.logicalDevice   = m_rendererInternals.logicalDevice;
-            framebufferCreateInfo.renderPass      = m_graphicsPipeline->renderPass;
-            framebufferCreateInfo.swapChainExtent = m_rendererInternals.swapchain->extent;
-            framebufferCreateInfo.attachments.push_back(frame.imageView);
+            Chicane::Vulkan::Frame::Buffer::CreateInfo createInfo = {};
+            createInfo.id              = m_id;
+            createInfo.logicalDevice   = m_rendererInternals.logicalDevice;
+            createInfo.renderPass      = m_graphicsPipeline->renderPass;
+            createInfo.swapChainExtent = m_rendererInternals.swapchain->extent;
+            createInfo.attachments.push_back(frame.imageView);
+            createInfo.attachments.push_back(frame.depth.imageView);
 
-            Chicane::Vulkan::Frame::Buffer::init(frame, framebufferCreateInfo);
+            Chicane::Vulkan::Frame::Buffer::init(frame, createInfo);
         }
     }
 

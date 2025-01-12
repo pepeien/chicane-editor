@@ -23,7 +23,7 @@ namespace Editor
 
             Chicane::Application::getRenderer()->pushLayer(
                 new Layer(),
-                Chicane::Layer::PushStrategy::BeforeLayer,
+                Chicane::Layer::PushStrategy::AfterLayer,
                 "Level"
             );
 
