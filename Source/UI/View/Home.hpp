@@ -10,13 +10,13 @@ namespace Editor
         HomeView();
 
     private:
-        std::uint32_t getFPS(const Chicane::Grid::ComponentEvent& inEvent);
-        std::string getFrametime(const Chicane::Grid::ComponentEvent& inEvent);
+        std::uint32_t getFPS(const Chicane::Grid::Component::Event& inEvent);
+        std::string getFrametime(const Chicane::Grid::Component::Event& inEvent);
 
-        void showLog(const Chicane::Log::Instance& inLog);
+        void showLog(const Chicane::Log::Entry& inLog);
         void showActor(Chicane::Actor* inActor);
         void showDirectoryHistory(const std::string& inPath);
-        void showDirectory(const Chicane::FileSystem::ListItem& inList);
+        void showDirectory(const Chicane::FileSystem::Item& inList);
 
     private:
         void setupWatchers();

@@ -4,10 +4,10 @@
 
 namespace Editor
 {
-    class Layer : public Chicane::Layer
+    class Layer : public Chicane::Layer::Instance
     {
     public:
-        Layer(Chicane::Window* inWindow);
+        Layer();
         ~Layer();
 
     public:
@@ -15,11 +15,7 @@ namespace Editor
         void destroy() override;
         void rebuild() override;
 
-        void render(
-            Chicane::Frame::Instance& outFrame,
-            const vk::CommandBuffer& inCommandBuffer,
-            const vk::Extent2D& inSwapChainExtent
-        ) override;
+        void render(void* outData) override;
 
     private:
         void initFrameDescriptorSetLayout();
@@ -31,16 +27,14 @@ namespace Editor
         void refreshViewport();
 
     private:
-        Chicane::Renderer::Internals                         m_rendererInternals;
+        Chicane::Vulkan::Renderer::Internals                         m_rendererInternals;
 
-        std::unique_ptr<Chicane::GraphicsPipeline::Instance> m_graphicsPipeline;
+        std::unique_ptr<Chicane::Vulkan::GraphicsPipeline::Instance> m_graphicsPipeline;
 
-        vk::DescriptorSet                                    m_descriptorSet;
-        Chicane::Descriptor::Bundle                          m_frameDescriptor;
-        Chicane::Buffer::Instance                            m_vertexBuffer;
+        vk::DescriptorSet                                            m_descriptorSet;
+        Chicane::Vulkan::Descriptor::Bundle                          m_frameDescriptor;
+        Chicane::Vulkan::Buffer::Instance                            m_vertexBuffer;
 
-        Chicane::Vec<2, std::uint32_t>                       m_viewport;
-
-        std::vector<vk::ClearValue>                          m_clearValues;
+        std::vector<vk::ClearValue>                                  m_clearValues;
     };
 }

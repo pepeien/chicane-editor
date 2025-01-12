@@ -7,38 +7,38 @@ namespace Editor
 {
     void run()
     {
-        Chicane::Loader::loadCubemap("Content/Textures/Skybox/Gray.box");
+        std::unique_ptr<HomeView> view;
 
-        std::unique_ptr<Chicane::Controller> controller = std::make_unique<Chicane::Controller>();
-        Chicane::setActiveController(controller.get());
+        Chicane::Application::CreateInfo createInfo = {};
+        createInfo.title        = "Chicane Editor";
+        createInfo.icon         = "Content/Icon.png";
+        createInfo.resolution.x = 1600;
+        createInfo.resolution.y = 900;
+        createInfo.window       = Chicane::Window::Type::Windowed;
+        createInfo.renderer     = Chicane::Renderer::Type::Vulkan;
+        createInfo.display      = 0;
+        createInfo.onSetup      = [&]()
+        {
+            view = std::make_unique<HomeView>();
 
-        std::unique_ptr<Chicane::Level> level = std::make_unique<Chicane::Level>();
-        Chicane::setActiveLevel(level.get());
+            Chicane::Application::getRenderer()->pushLayer(
+                new Layer(),
+                Chicane::Layer::PushStrategy::BeforeLayer,
+                "Level"
+            );
 
-        Chicane::CameraActor* character = new Chicane::CameraActor();
-        character->setAbsoluteTranslation(Chicane::Vec<3, float>(-5.0f, -7.0f, 2.0f));
-        character->setAbsoluteRotation(Chicane::Vec<3, float>(0.0f, -34.5f, -12.5f));
-        Chicane::addActor(character);
-        Chicane::getActiveController()->attachTo(character);
+            Chicane::Loader::loadCubemap("Content/CubeMaps/Gray.bcmp");
 
-        std::unique_ptr<HomeView> view = std::make_unique<HomeView>();
-        Chicane::Grid::addView(view.get());
-        Chicane::Grid::setActiveView(view->getId());
+            Chicane::Application::addView(view.get());
+            Chicane::Application::setView(view->getId());
 
-        Chicane::WindowCreateInfo windowCreateInfo = {};
-        windowCreateInfo.title         = "Factory Editor";
-        windowCreateInfo.icon          = "Content/Icon.png";
-        windowCreateInfo.resolution.x  = 1600;
-        windowCreateInfo.resolution.y  = 900;
-        windowCreateInfo.type          = Chicane::WindowType::Windowed;
-        windowCreateInfo.displayIndex  = 0;
+            Chicane::CameraPawn* character = new Chicane::CameraPawn();
+            character->setAbsoluteTranslation(Chicane::Vec<3, float>(-5.0f, -7.0f, 2.0f));
+            character->setAbsoluteRotation(Chicane::Vec<3, float>(0.0f, -34.5f, -12.5f));
+            Chicane::Application::getLevel()->addActor(character);
+            Chicane::Application::getController()->attachTo(character);
+        };
 
-        std::unique_ptr<Chicane::Window> window = std::make_unique<Chicane::Window>(windowCreateInfo);
-        window->addLayer(
-            new Layer(window.get()),
-            Chicane::Layer::Push::BeforeLayer,
-            "Level"
-        );
-        window->run();
+        Chicane::Application::run(createInfo);
     }
 }

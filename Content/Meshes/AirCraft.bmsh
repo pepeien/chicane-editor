@@ -1,0 +1,6 @@
+<Asset version="1" id="Apple_Sun">
+    <Group id="Body">
+        <Model>Content/Models/AirCraft.bmdl</Model>
+        <Texture>Content/Textures/Cubemap_Guide.btex</Texture>
+    </Group>
+</Asset>

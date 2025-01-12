@@ -1,7 +1,6 @@
 #include "UI/View/Home.hpp"
 
 #include "Base.hpp"
-#include "Chicane/Game/Actor/Component/Mesh.hpp"
 
 constexpr const SDL_DialogFileFilter m_modelFilters[] = {
     { "All (.obj)", "obj" },
@@ -10,8 +9,8 @@ constexpr const SDL_DialogFileFilter m_modelFilters[] = {
 };
 
 constexpr const SDL_DialogFileFilter m_textureFilters[] = {
-    { "All (.jpg, .jpeg)", "jpg;jpeg" },
-    { "JPEG (.jpg, .jpeg)", "jpg;jpeg" },
+    { "All (.png)", "png" },
+    { "Portable Network Graphics (.png)", "png" },
     { nullptr, nullptr }
 };
 
@@ -19,8 +18,8 @@ namespace Editor
 {
     HomeView::HomeView()
         : Chicane::Grid::View(
-            "home",
-            "Content/View/Home.grid"
+            "editor_home",
+            "Content/Views/Home.grid"
         ),
         m_uiSelectedActor(std::make_any<std::string>("")),
         m_uiIsConsoleOpen(std::make_any<std::string>("false")),
@@ -53,19 +52,19 @@ namespace Editor
         listDir(".");
     }
 
-    std::uint32_t HomeView::getFPS(const Chicane::Grid::ComponentEvent& inEvent)
+    std::uint32_t HomeView::getFPS(const Chicane::Grid::Component::Event& inEvent)
     {
-        return Chicane::getTelemetry().frame.rate;
+        return Chicane::Application::getTelemetry().frame.rate;
     }
 
-    std::string HomeView::getFrametime(const Chicane::Grid::ComponentEvent& inEvent)
+    std::string HomeView::getFrametime(const Chicane::Grid::Component::Event& inEvent)
     {
-        std::string frametime = std::to_string(Chicane::getTelemetry().frame.time);
+        std::string frametime = std::to_string(Chicane::Application::getTelemetry().frame.time);
 
         return std::string(frametime.begin(), frametime.end() - 5);
     }
 
-    void HomeView::showLog(const Chicane::Log::Instance& inLog)
+    void HomeView::showLog(const Chicane::Log::Entry& inLog)
     {
         if (inLog.isEmpty())
         {
@@ -90,7 +89,7 @@ namespace Editor
         props.style.width           = Chicane::Grid::getSize("100%");
         props.style.height          = Chicane::Grid::getSize("4vh");
         props.style.backgroundColor = "#444444";
-        props.onClick               = [&](const Chicane::Grid::ComponentEvent& inEvent)
+        props.onClick               = [&](const Chicane::Grid::Component::Event& inEvent)
         {
             m_selectedActor = inActor;
 
@@ -113,11 +112,11 @@ namespace Editor
             return 0;
         };
         props._renderers.push_back(
-            [&](const Chicane::Grid::ComponentEvent& inEvent)
+            [&](const Chicane::Grid::Component::Event& inEvent)
             {
                 Chicane::Grid::Style style {};
-                style.horizontalAlignment = Chicane::Grid::Alignment::Center;
-                style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+                style.horizontalAlignment = Chicane::Grid::Style::Alignment::Center;
+                style.verticalAlignment   = Chicane::Grid::Style::Alignment::Center;
 
                 Chicane::Grid::TextComponent::compileRaw(props.id, style);
 
@@ -141,27 +140,27 @@ namespace Editor
         props.id = inPath;
         props.style.width = Chicane::Grid::getSize(
             "5vw",
-            Chicane::Grid::Direction::Horizontal,
-            Chicane::Grid::Position::Relative
+            Chicane::Grid::Style::Direction::Horizontal,
+            Chicane::Grid::Style::Position::Relative
         );
         props.style.height = Chicane::Grid::getSize(
             Chicane::Grid::AUTO_SIZE_UNIT,
-            Chicane::Grid::Direction::Vertical,
-            Chicane::Grid::Position::Relative
+            Chicane::Grid::Style::Direction::Vertical,
+            Chicane::Grid::Style::Position::Relative
         );
         props.style.backgroundColor = "#444444";
-        props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
+        props.onClick = [&](const Chicane::Grid::Component::Event& inEvent)
         {
             listDir(inPath);
 
             return 0;
         };
         props._renderers.push_back(
-            [&](const Chicane::Grid::ComponentEvent& inEvent)
+            [&](const Chicane::Grid::Component::Event& inEvent)
             {
                 Chicane::Grid::Style style {};
-                style.horizontalAlignment = Chicane::Grid::Alignment::Center;
-                style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+                style.horizontalAlignment = Chicane::Grid::Style::Alignment::Center;
+                style.verticalAlignment   = Chicane::Grid::Style::Alignment::Center;
 
                 Chicane::Grid::TextComponent::compileRaw(folderName, style);
 
@@ -172,36 +171,36 @@ namespace Editor
         Chicane::Grid::ButtonComponent::compileRaw(props);
     }
 
-    void HomeView::showDirectory(const Chicane::FileSystem::ListItem& inItem)
+    void HomeView::showDirectory(const Chicane::FileSystem::Item& inItem)
     {
         Chicane::Grid::ButtonComponent::Props props {};
         props.id = inItem.path;
         props.style.width = Chicane::Grid::getSize(
             Chicane::Grid::AUTO_SIZE_UNIT,
-            Chicane::Grid::Direction::Horizontal,
-            Chicane::Grid::Position::Relative
+            Chicane::Grid::Style::Direction::Horizontal,
+            Chicane::Grid::Style::Position::Relative
         );
         props.style.height = Chicane::Grid::getSize(
             Chicane::Grid::AUTO_SIZE_UNIT,
-            Chicane::Grid::Direction::Vertical,
-            Chicane::Grid::Position::Relative
+            Chicane::Grid::Style::Direction::Vertical,
+            Chicane::Grid::Style::Position::Relative
         );
         props.style.backgroundColor = "#444444";
 
-        if (inItem.type == Chicane::FileSystem::ListType::Folder)
+        if (inItem.type == Chicane::FileSystem::Item::Type::Folder)
         {
-            props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
+            props.onClick = [&](const Chicane::Grid::Component::Event& inEvent)
             {
                 listDir(inItem.path);
 
                 return 0;
             };
             props._renderers.push_back(
-                [&](const Chicane::Grid::ComponentEvent& inEvent)
+                [&](const Chicane::Grid::Component::Event& inEvent)
                 {
                     Chicane::Grid::Style style {};
-                    style.horizontalAlignment = Chicane::Grid::Alignment::Center;
-                    style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+                    style.horizontalAlignment = Chicane::Grid::Style::Alignment::Center;
+                    style.verticalAlignment   = Chicane::Grid::Style::Alignment::Center;
 
                     std::string title = inItem.name + " - " + std::to_string(inItem.childCount) + " Items";
 
@@ -212,20 +211,24 @@ namespace Editor
             );
         }
 
-        if (inItem.type == Chicane::FileSystem::ListType::File)
+        if (inItem.type == Chicane::FileSystem::Item::Type::File)
         {
-            props.onClick = [&](const Chicane::Grid::ComponentEvent& inEvent)
+            if (inItem.extension == Chicane::Box::Mesh::EXTENSION)
             {
-                Chicane::addActor(new MeshActor(inItem.path));
+                props.onClick = [&](const Chicane::Grid::Component::Event& inEvent)
+                {
+                    Chicane::Application::getLevel()->addActor(new MeshActor(inItem.path));
 
-                return 0;
-            };
+                    return 0;
+                };
+            }
+
             props._renderers.push_back(
-                [&](const Chicane::Grid::ComponentEvent& inEvent)
+                [&](const Chicane::Grid::Component::Event& inEvent)
                 {
                     Chicane::Grid::Style style {};
-                    style.horizontalAlignment = Chicane::Grid::Alignment::Center;
-                    style.verticalAlignment   = Chicane::Grid::Alignment::Center;
+                    style.horizontalAlignment = Chicane::Grid::Style::Alignment::Center;
+                    style.verticalAlignment   = Chicane::Grid::Style::Alignment::Center;
 
                     Chicane::Grid::TextComponent::compileRaw(inItem.name, style);
 
@@ -244,15 +247,15 @@ namespace Editor
             {
                 std::vector<std::any> logs;
 
-                for (const Chicane::Log::Instance& log : inLogs)
+                for (const Chicane::Log::Entry& log : inLogs)
                 {
-                    logs.push_back(std::make_any<Chicane::Log::Instance>(log));
+                    logs.push_back(std::make_any<Chicane::Log::Entry>(log));
                 }
 
                 m_uiConsoleLogs = std::make_any<std::vector<std::any>>(logs);
             }
         );
-        Chicane::watchActiveLevel(
+        Chicane::Application::watchLevel(
             [this](Chicane::Level* inLevel)
             {
                 if (!inLevel)
@@ -334,7 +337,7 @@ namespace Editor
         // Functions
         addFunction(
             "showActor",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 showActor(std::any_cast<Chicane::Actor*>(inEvent.values[0]));
 
@@ -343,7 +346,7 @@ namespace Editor
         );
         addFunction(
             "onTranslationChange",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 updateTranslation();
 
@@ -352,7 +355,7 @@ namespace Editor
         );
         addFunction(
             "onRotationChange",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 updateRotation();
 
@@ -361,7 +364,7 @@ namespace Editor
         );
         addFunction(
             "onScalingChange",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 updateScaling();
 
@@ -385,7 +388,7 @@ namespace Editor
         // Functions
         addFunction(
             "showDirectoryHistory",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 showDirectoryHistory(std::any_cast<std::string>(inEvent.values[0]));
 
@@ -394,9 +397,9 @@ namespace Editor
         );
         addFunction(
             "showDirectory",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
-                showDirectory(std::any_cast<Chicane::FileSystem::ListItem>(inEvent.values[0]));
+                showDirectory(std::any_cast<Chicane::FileSystem::Item>(inEvent.values[0]));
 
                 return 0;
             }
@@ -408,7 +411,7 @@ namespace Editor
         // Functions
         addFunction(
             "showModelCreator",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 Chicane::FileSystem::FileDialog props {};
                 props.title         = "Select 3D Model";
@@ -420,26 +423,28 @@ namespace Editor
                     props,
                     [](void* inData, const char* const* inFiles, int inFilter)
                     {
-                        const auto& result = Chicane::FileSystem::DialogResult::fromRaw(inFiles);
+                        const auto& result = Chicane::FileSystem::Dialog::Result::fromRaw(inFiles);
 
                         if (result.empty())
                         {
                             return;
                         }
 
-                        const auto& path = result.at(0).path;
+                        for (const auto& file : result)
+                        {
+                            std::string path = file.path.parent_path().string();
+                            std::string name = file.path.stem().string();
+                            std::string filepath = path;
+                            filepath += (char) Chicane::FileSystem::SEPARATOR;
+                            filepath += name;
+                            filepath += Chicane::Box::Model::EXTENSION;
 
-                        Chicane::Box::WriteEntry entry {};
-                        entry.type         = Chicane::Box::EntryType::Model;
-                        entry.dataFilePath = path.string();
-
-                        Chicane::Box::WriteInfo writeInfo {};
-                        writeInfo.type         = Chicane::Box::Type::Model;
-                        writeInfo.name         = path.filename().string();
-                        writeInfo.outputFolder = "Content/Models/";
-                        writeInfo.entries.push_back(entry);
-
-                        Chicane::Box::write(writeInfo);
+                            Chicane::Box::Model model(filepath);
+                            model.setId(name);
+                            model.setVendor(Chicane::Model::Vendor::Type::Wavefront);
+                            model.setData(file.path.string());
+                            model.saveXML();
+                        }
                     }
                 );
 
@@ -448,7 +453,7 @@ namespace Editor
         );
         addFunction(
             "showTextureCreator",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 Chicane::FileSystem::FileDialog props {};
                 props.title         = "Select a Texture Image";
@@ -460,26 +465,28 @@ namespace Editor
                     props,
                     [](void* inData, const char* const* inFiles, int inFilter)
                     {
-                        const auto& result = Chicane::FileSystem::DialogResult::fromRaw(inFiles);
+                        const auto& result = Chicane::FileSystem::Dialog::Result::fromRaw(inFiles);
 
                         if (result.empty())
                         {
                             return;
                         }
 
-                        const auto& path = result.at(0).path;
+                        for (const auto& file : result)
+                        {
+                            std::string path = file.path.parent_path().string();
+                            std::string name = file.path.stem().string();
+                            std::string filepath = path;
+                            filepath += (char) Chicane::FileSystem::SEPARATOR;
+                            filepath += name;
+                            filepath += Chicane::Box::Texture::EXTENSION;
 
-                        Chicane::Box::WriteEntry entry {};
-                        entry.type         = Chicane::Box::EntryType::Texture;
-                        entry.dataFilePath = result.at(0).path.string();
-
-                        Chicane::Box::WriteInfo writeInfo {};
-                        writeInfo.type         = Chicane::Box::Type::Texture;
-                        writeInfo.name         = path.filename().string();
-                        writeInfo.outputFolder = "Content/Textures/";
-                        writeInfo.entries.push_back(entry);
-
-                        Chicane::Box::write(writeInfo);
+                            Chicane::Box::Texture model(filepath);
+                            model.setId(name);
+                            model.setVendor(Chicane::Texture::Vendor::Png);
+                            model.setData(file.path.string());
+                            model.saveXML();
+                        }
                     }
                 );
 
@@ -503,7 +510,7 @@ namespace Editor
         // Functions
         addFunction(
             "showConsole",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 m_uiIsConsoleOpen = std::make_any<std::string>("true");
 
@@ -512,7 +519,7 @@ namespace Editor
         );
         addFunction(
             "hideConsole",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
                 m_uiIsConsoleOpen = std::make_any<std::string>("false");
 
@@ -521,9 +528,9 @@ namespace Editor
         );
         addFunction(
             "showLog",
-            [this](const Chicane::Grid::ComponentEvent& inEvent)
+            [this](const Chicane::Grid::Component::Event& inEvent)
             {
-                showLog(std::any_cast<Chicane::Log::Instance>(inEvent.values[0]));
+                showLog(std::any_cast<Chicane::Log::Entry>(inEvent.values[0]));
 
                 return 0;
             }
@@ -596,7 +603,7 @@ namespace Editor
 
         std::vector<std::any> actors {};
 
-        for (Chicane::Actor* actor : Chicane::getActors())
+        for (Chicane::Actor* actor : Chicane::Application::getLevel()->getActors())
         {
             actors.push_back(std::make_any<Chicane::Actor*>(actor));
         }
@@ -637,24 +644,30 @@ namespace Editor
 
         for (const auto& item : Chicane::FileSystem::ls(inPath))
         {
-            if (item.type == Chicane::FileSystem::ListType::Folder)
+            if (item.type == Chicane::FileSystem::Item::Type::Folder)
             {
                 items.push_back(
-                    std::make_any<Chicane::FileSystem::ListItem>(item)
+                    std::make_any<Chicane::FileSystem::Item>(item)
                 );
 
                 continue;
             }
 
-            std::string extension = item.extension;
+            std::vector<std::string> extensions {
+                Chicane::Box::CubeMap::EXTENSION,
+                Chicane::Box::Mesh::EXTENSION,
+                Chicane::Box::Model::EXTENSION,
+                Chicane::Box::Texture::EXTENSION,
+                ".grid"
+            };
 
-            if (!Chicane::Utils::areEquals(extension, ".box") && !Chicane::Utils::areEquals(extension, ".grid"))
+            if (std::find(extensions.begin(), extensions.end(), item.extension) == extensions.end())
             {
                 continue;
             }
 
             items.push_back(
-                std::make_any<Chicane::FileSystem::ListItem>(item)
+                std::make_any<Chicane::FileSystem::Item>(item)
             );
         }
 
