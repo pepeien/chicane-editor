@@ -4,7 +4,7 @@ namespace Editor
 {
     Layer::Layer()
         : Chicane::Layer::Instance("Editor"),
-        m_rendererInternals(Chicane::Application::getRenderer<Chicane::Vulkan::Renderer>()->getInternals()),
+        m_internals(Chicane::Application::getRenderer<Chicane::Vulkan::Renderer>()->getInternals()),
         m_clearValues({})
     {
         m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
@@ -27,19 +27,19 @@ namespace Editor
 
     Layer::~Layer()
     {
-        m_rendererInternals.logicalDevice.waitIdle();
+        m_internals.logicalDevice.waitIdle();
 
         // Graphics Pipeline
         m_graphicsPipeline.reset();
 
         // Descriptors
-        m_rendererInternals.logicalDevice.destroyDescriptorSetLayout(
+        m_internals.logicalDevice.destroyDescriptorSetLayout(
             m_frameDescriptor.setLayout
         );
 
         // Buffers
         Chicane::Vulkan::Buffer::destroy(
-            m_rendererInternals.logicalDevice,
+            m_internals.logicalDevice,
             m_vertexBuffer
         );
     }
@@ -69,9 +69,9 @@ namespace Editor
             return;
         }
 
-        m_rendererInternals.logicalDevice.waitIdle();
+        m_internals.logicalDevice.waitIdle();
 
-        m_rendererInternals.logicalDevice.destroyDescriptorPool(
+        m_internals.logicalDevice.destroyDescriptorPool(
             m_frameDescriptor.pool
         );
 
@@ -149,40 +149,68 @@ namespace Editor
 
         Chicane::Vulkan::Descriptor::initSetLayout(
             m_frameDescriptor.setLayout,
-            m_rendererInternals.logicalDevice,
+            m_internals.logicalDevice,
             frameLayoutBidings
         );
     }
 
-    void Layer::initGraphicsPipeline()
+    std::vector<Chicane::Vulkan::Shader::StageCreateInfo> Layer::getGraphicsPipelineShaders()
     {
-        std::vector<vk::AttachmentDescription> attachments {};
+        Chicane::Vulkan::Shader::StageCreateInfo vertexShader {};
+        vertexShader.path = "Content/Shaders/grid.vert.spv";
+        vertexShader.type = vk::ShaderStageFlagBits::eVertex;
 
+        Chicane::Vulkan::Shader::StageCreateInfo fragmentShader {};
+        fragmentShader.path = "Content/Shaders/grid.frag.spv";
+        fragmentShader.type = vk::ShaderStageFlagBits::eFragment;
+
+        std::vector<Chicane::Vulkan::Shader::StageCreateInfo> result {};
+        result.push_back(vertexShader);
+        result.push_back(fragmentShader);
+
+        return result;    
+    }
+
+    std::vector<vk::DescriptorSetLayout> Layer::getGraphicsPipelineDescriptorLayouts()
+    {
+        std::vector<vk::DescriptorSetLayout> result {};
+        result.push_back(m_frameDescriptor.setLayout);
+
+        return result;
+    }
+
+    std::vector<vk::AttachmentDescription> Layer::getGraphicsPipelineAttachments()
+    {
         Chicane::Vulkan::GraphicsPipeline::Attachment colorAttachment {};
-        colorAttachment.format        = m_rendererInternals.swapchain->format;
+        colorAttachment.format        = m_internals.swapchain->format;
         colorAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
         colorAttachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
         colorAttachment.finalLayout   = vk::ImageLayout::ePresentSrcKHR;
 
         Chicane::Vulkan::GraphicsPipeline::Attachment depthAttachment {};
-        depthAttachment.format        = m_rendererInternals.swapchain->depthFormat;
+        depthAttachment.format        = m_internals.swapchain->depthFormat;
         depthAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
         depthAttachment.initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
         depthAttachment.finalLayout   = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
+        std::vector<vk::AttachmentDescription> result {};
+        result.push_back(Chicane::Vulkan::GraphicsPipeline::createColorAttachment(colorAttachment));
+        result.push_back(Chicane::Vulkan::GraphicsPipeline::createDepthAttachment(depthAttachment));
+
+        return result;
+    }
+
+    void Layer::initGraphicsPipeline()
+    {
         Chicane::Vulkan::GraphicsPipeline::CreateInfo createInfo = {};
-        createInfo.bHasVertices         = true;
+        createInfo.bHasVertices         = false;
         createInfo.bHasDepthWrite       = false;
         createInfo.bHasBlending         = true;
-        createInfo.logicalDevice        = m_rendererInternals.logicalDevice;
-        createInfo.vertexShaderPath     = "Content/Shaders/grid.vert.spv";
-        createInfo.fragmentShaderPath   = "Content/Shaders/grid.frag.spv";
-        createInfo.extent               = m_rendererInternals.swapchain->extent;
-        createInfo.descriptorSetLayouts = { m_frameDescriptor.setLayout };
-        createInfo.attachments           = {
-            Chicane::Vulkan::GraphicsPipeline::createColorAttachment(colorAttachment),
-            Chicane::Vulkan::GraphicsPipeline::createDepthAttachment(depthAttachment)
-        };
+        createInfo.logicalDevice        = m_internals.logicalDevice;
+        createInfo.shaders              = getGraphicsPipelineShaders();
+        createInfo.extent               = m_internals.swapchain->extent;
+        createInfo.descriptorSetLayouts = getGraphicsPipelineDescriptorLayouts();;
+        createInfo.attachments          = getGraphicsPipelineAttachments();
         createInfo.polygonMode          = vk::PolygonMode::eFill;
 
         m_graphicsPipeline = std::make_unique<Chicane::Vulkan::GraphicsPipeline::Instance>(createInfo);
@@ -190,13 +218,13 @@ namespace Editor
 
     void Layer::initFramebuffers()
     {
-        for (Chicane::Vulkan::Frame::Instance& frame : m_rendererInternals.swapchain->frames)
+        for (Chicane::Vulkan::Frame::Instance& frame : m_internals.swapchain->frames)
         {
             Chicane::Vulkan::Frame::Buffer::CreateInfo createInfo = {};
             createInfo.id              = m_id;
-            createInfo.logicalDevice   = m_rendererInternals.logicalDevice;
+            createInfo.logicalDevice   = m_internals.logicalDevice;
             createInfo.renderPass      = m_graphicsPipeline->renderPass;
-            createInfo.swapChainExtent = m_rendererInternals.swapchain->extent;
+            createInfo.swapChainExtent = m_internals.swapchain->extent;
             createInfo.attachments.push_back(frame.imageView);
             createInfo.attachments.push_back(frame.depth.imageView);
 
@@ -207,22 +235,24 @@ namespace Editor
     void Layer::initFrameResources()
     {
         Chicane::Vulkan::Descriptor::PoolCreateInfo descriptorPoolCreateInfo;
-        descriptorPoolCreateInfo.size  = static_cast<uint32_t>(m_rendererInternals.swapchain->frames.size());
-        descriptorPoolCreateInfo.types.push_back(vk::DescriptorType::eUniformBuffer);
+        descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_internals.swapchain->frames.size());
+        descriptorPoolCreateInfo.sizes = {
+            { .type = vk::DescriptorType::eUniformBuffer, .descriptorCount = 1 }
+        };
 
         Chicane::Vulkan::Descriptor::initPool(
             m_frameDescriptor.pool,
-            m_rendererInternals.logicalDevice,
+            m_internals.logicalDevice,
             descriptorPoolCreateInfo
         );
 
-        for (Chicane::Vulkan::Frame::Instance& frame : m_rendererInternals.swapchain->frames)
+        for (Chicane::Vulkan::Frame::Instance& frame : m_internals.swapchain->frames)
         {
             // Scene
             vk::DescriptorSet sceneDescriptorSet;
             Chicane::Vulkan::Descriptor::allocalteSet(
                 sceneDescriptorSet,
-                m_rendererInternals.logicalDevice,
+                m_internals.logicalDevice,
                 m_frameDescriptor.setLayout,
                 m_frameDescriptor.pool
             );
@@ -234,7 +264,7 @@ namespace Editor
             cameraWriteInfo.dstArrayElement = 0;
             cameraWriteInfo.descriptorCount = 1;
             cameraWriteInfo.descriptorType  = vk::DescriptorType::eUniformBuffer;
-            cameraWriteInfo.pBufferInfo     = &frame.cameraDescriptorBufferInfo;
+            cameraWriteInfo.pBufferInfo     = &frame.cameraResource.bufferInfo;
             frame.addWriteDescriptorSet(cameraWriteInfo);
         }
     }
@@ -248,8 +278,8 @@ namespace Editor
         };
 
         Chicane::Vulkan::Buffer::CreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.physicalDevice   = m_rendererInternals.physicalDevice;
-        stagingBufferCreateInfo.logicalDevice    = m_rendererInternals.logicalDevice;
+        stagingBufferCreateInfo.physicalDevice   = m_internals.physicalDevice;
+        stagingBufferCreateInfo.logicalDevice    = m_internals.logicalDevice;
         stagingBufferCreateInfo.size             = sizeof(float) * vertices.size();
         stagingBufferCreateInfo.usage            = vk::BufferUsageFlagBits::eTransferSrc;
         stagingBufferCreateInfo.memoryProperties = vk::MemoryPropertyFlagBits::eHostVisible |
@@ -258,7 +288,7 @@ namespace Editor
         Chicane::Vulkan::Buffer::Instance stagingBuffer;
         Chicane::Vulkan::Buffer::init(stagingBuffer, stagingBufferCreateInfo);
 
-        void* writeLocation = m_rendererInternals.logicalDevice.mapMemory(
+        void* writeLocation = m_internals.logicalDevice.mapMemory(
             stagingBuffer.memory,
             0,
             stagingBufferCreateInfo.size
@@ -268,11 +298,11 @@ namespace Editor
             vertices.data(),
             stagingBufferCreateInfo.size
         );
-        m_rendererInternals.logicalDevice.unmapMemory(stagingBuffer.memory);
+        m_internals.logicalDevice.unmapMemory(stagingBuffer.memory);
 
         Chicane::Vulkan::Buffer::CreateInfo bufferCreateInfo;
-        bufferCreateInfo.physicalDevice   = m_rendererInternals.physicalDevice;
-        bufferCreateInfo.logicalDevice    = m_rendererInternals.logicalDevice;;
+        bufferCreateInfo.physicalDevice   = m_internals.physicalDevice;
+        bufferCreateInfo.logicalDevice    = m_internals.logicalDevice;;
         bufferCreateInfo.size             = stagingBufferCreateInfo.size;
         bufferCreateInfo.usage            = vk::BufferUsageFlagBits::eTransferDst |
                                             vk::BufferUsageFlagBits::eVertexBuffer;
@@ -284,12 +314,12 @@ namespace Editor
             stagingBuffer,
             m_vertexBuffer,
             bufferCreateInfo.size,
-            m_rendererInternals.graphicsQueue,
-            m_rendererInternals.mainCommandBuffer
+            m_internals.graphicsQueue,
+            m_internals.mainCommandBuffer
         );
 
         Chicane::Vulkan::Buffer::destroy(
-            m_rendererInternals.logicalDevice,
+            m_internals.logicalDevice,
             stagingBuffer
         );
     }

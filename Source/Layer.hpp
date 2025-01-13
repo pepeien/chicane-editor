@@ -19,6 +19,9 @@ namespace Editor
 
     private:
         void initFrameDescriptorSetLayout();
+        std::vector<Chicane::Vulkan::Shader::StageCreateInfo> getGraphicsPipelineShaders();
+        std::vector<vk::DescriptorSetLayout> getGraphicsPipelineDescriptorLayouts();
+        std::vector<vk::AttachmentDescription> getGraphicsPipelineAttachments();
         void initGraphicsPipeline();
         void initFramebuffers();
         void initFrameResources();
@@ -27,7 +30,7 @@ namespace Editor
         void refreshViewport();
 
     private:
-        Chicane::Vulkan::Renderer::Internals                         m_rendererInternals;
+        Chicane::Vulkan::Renderer::Internals                         m_internals;
 
         std::unique_ptr<Chicane::Vulkan::GraphicsPipeline::Instance> m_graphicsPipeline;
 
