@@ -2,11 +2,24 @@
 
 layout(location = 0) out vec4 outColor;
 
-layout(location = 0) in float inNear;
-layout(location = 1) in float inFar;
-layout(location = 2) in vec3 inNearPoint;
-layout(location = 3) in vec3 inFarPoint;
-layout(location = 4) in mat4 inViewProjection;
+layout(set = 0, binding = 0) uniform CameraUBO {
+    vec4 clip;
+
+    mat4 view;
+    mat4 projection;
+    mat4 viewProjection;
+    mat4 inversedViewProjection;
+
+    vec4 forward;
+    vec4 right;
+    vec4 up;
+
+    vec4 translation;
+} camera;
+
+layout(location = 0) in vec3 inNearPoint;
+layout(location = 1) in vec3 inFarPoint;
+layout(location = 2) in float inDepth;
 
 vec4 grid(vec3 position, float scale, bool hasAxis) {
     vec2 coord      = position.xy * scale;
@@ -36,11 +49,15 @@ vec4 grid(vec3 position, float scale, bool hasAxis) {
     return color;
 }
 
-float computeLinearDepth(float depth) {
-    float clippedDepth = depth * 2.0 - 1.0;
-    float linearDepth  = (2.0 * inNear * inFar) / (inFar + inNear - clippedDepth * (inFar - inNear));
+float computeDepth(vec4 clipSpacePosition) {
+    return clipSpacePosition.y / clipSpacePosition.w;
+}
 
-    return linearDepth / inFar;
+float computeLinearDepth(vec4 clipSpacePosition) {
+    float clipSpaceDepth = (clipSpacePosition.y / clipSpacePosition.w) * 2.0 - 1.0;
+    float linearDepth = (2.0 * camera.clip.x * camera.clip.y) / (camera.clip.y + camera.clip.x - clipSpaceDepth * (camera.clip.y - camera.clip.x));
+
+    return linearDepth / camera.clip.y; 
 }
 
 void main() {
@@ -50,11 +67,14 @@ void main() {
         return;
     }
 
-    vec3 position  = inNearPoint + floorDistance * (inFarPoint - inNearPoint);
-    vec4 clipSpace = inViewProjection * vec4(position.xyz, 1.0);
-    float depth    = clipSpace.y / clipSpace.w;
+    vec3 position     = inNearPoint + floorDistance * (inFarPoint - inNearPoint);
+    vec4 clipSpace    = camera.inversedViewProjection * vec4(position, 1.0);
+    float depth       = computeDepth(clipSpace);
+    float linearDepth = computeLinearDepth(clipSpace);
 
-    outColor     = grid(position, 1.0, false);
-    outColor    += grid(position, 10.0, true);
-    outColor.a  *= max(0.0, (0.5 - computeLinearDepth(depth)));
+    outColor    = grid(position, 1.0, false);
+    outColor   += grid(position, 10.0, true);
+    outColor.a *= (1.0 - smoothstep(0.2, 1.0, linearDepth));
+
+    gl_FragDepth = inDepth;
 }

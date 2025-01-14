@@ -3,42 +3,45 @@
 #include "Layer.hpp"
 #include "UI/View/Home.hpp"
 
-namespace Editor
+namespace Chicane
 {
-    void run()
+    namespace Editor
     {
-        std::unique_ptr<HomeView> view;
-
-        Chicane::Application::CreateInfo createInfo = {};
-        createInfo.title        = "Chicane Editor";
-        createInfo.icon         = "Content/Icon.png";
-        createInfo.resolution.x = 1600;
-        createInfo.resolution.y = 900;
-        createInfo.window       = Chicane::Window::Type::Windowed;
-        createInfo.renderer     = Chicane::Renderer::Type::Vulkan;
-        createInfo.display      = 0;
-        createInfo.onSetup      = [&]()
+        void run()
         {
-            view = std::make_unique<HomeView>();
+            std::unique_ptr<HomeView> view;
 
-            Chicane::Application::getRenderer()->pushLayer(
-                new Layer(),
-                Chicane::Layer::PushStrategy::AfterLayer,
-                "Level"
-            );
+            Application::CreateInfo createInfo = {};
+            createInfo.title        = "Chicane Editor";
+            createInfo.icon         = "Content/Icon.png";
+            createInfo.resolution.x = 1600;
+            createInfo.resolution.y = 900;
+            createInfo.window       = Window::Type::Windowed;
+            createInfo.renderer     = Renderer::Type::Vulkan;
+            createInfo.display      = 0;
+            createInfo.onSetup      = [&]()
+            {
+                view = std::make_unique<HomeView>();
 
-            Chicane::Loader::loadCubemap("Content/CubeMaps/Gray.bcmp");
+                Application::getRenderer()->pushLayer(
+                    new Layer(),
+                    Chicane::Layer::PushStrategy::AfterLayer,
+                    "Level"
+                );
 
-            Chicane::Application::addView(view.get());
-            Chicane::Application::setView(view->getId());
+                Loader::loadCubemap("Content/CubeMaps/Gray.bcmp");
 
-            Chicane::CameraPawn* character = new Chicane::CameraPawn();
-            character->setAbsoluteTranslation(Chicane::Vec<3, float>(-5.0f, -7.0f, 2.0f));
-            character->setAbsoluteRotation(Chicane::Vec<3, float>(0.0f, -34.5f, -12.5f));
-            Chicane::Application::getLevel()->addActor(character);
-            Chicane::Application::getController()->attachTo(character);
-        };
+                Application::addView(view.get());
+                Application::setView(view->getId());
 
-        Chicane::Application::run(createInfo);
+                CameraPawn* character = new CameraPawn();
+                character->setAbsoluteTranslation(Vec<3, float>(-5.0f, -7.0f, 2.0f));
+                character->setAbsoluteRotation(Vec<3, float>(0.0f, -34.5f, -12.5f));
+                Application::getLevel()->addActor(character);
+                Application::getController()->attachTo(character);
+            };
+
+            Application::run(createInfo);
+        }
     }
 }

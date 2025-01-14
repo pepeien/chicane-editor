@@ -8,18 +8,21 @@
 #include "Chicane/Renderer.hpp"
 #include "Chicane/Renderer/Vulkan.hpp"
 
-class MeshActor : public Chicane::Actor
+namespace Chicane
 {
-public:
-    MeshActor(const std::string& inMesh)
-        : Chicane::Actor(),
-        m_meshComponent(new Chicane::MeshComponent())
+    class MeshActor : public Actor
     {
-        m_meshComponent->attachTo(this);
-        m_meshComponent->setMesh(inMesh);
-        m_meshComponent->activate();
-    }
+    public:
+        MeshActor(const std::string& inMesh)
+            : Actor(),
+            m_meshComponent(new MeshComponent())
+        {
+            m_meshComponent->attachTo(this);
+            m_meshComponent->setMesh(inMesh);
+            m_meshComponent->activate();
+        }
 
-private:
-    Chicane::MeshComponent* m_meshComponent;
-};
+    private:
+        MeshComponent* m_meshComponent;
+    };
+}

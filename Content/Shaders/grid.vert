@@ -6,6 +6,7 @@ layout(set = 0, binding = 0) uniform CameraUBO {
     mat4 view;
     mat4 projection;
     mat4 viewProjection;
+    mat4 inversedViewProjection;
 
     vec4 forward;
     vec4 right;
@@ -14,11 +15,9 @@ layout(set = 0, binding = 0) uniform CameraUBO {
     vec4 translation;
 } camera;
 
-layout(location = 0) out float outNear;
-layout(location = 1) out float outFar;
-layout(location = 2) out vec3 outNearPoint;
-layout(location = 3) out vec3 outFarPoint;
-layout(location = 4) out mat4 outViewProjection;
+layout(location = 0) out vec3 outNearPoint;
+layout(location = 1) out vec3 outFarPoint;
+layout(location = 2) out float outDepth;
 
 const vec3 positions[4] = vec3[](
 	vec3(-1.0, -1.0, 0.0),
@@ -30,16 +29,18 @@ const vec3 positions[4] = vec3[](
 const int indices[6] = int[6](0, 2, 1, 2, 0, 3);
 
 vec3 unprojectPoint(float x, float y, float z) {
-    vec4 unprojectedPoint =  inverse(camera.viewProjection) * vec4(x, y, z, 1.0);
+    vec4 point = camera.inversedViewProjection * vec4(x, y, z, 1.0);
 
-    return unprojectedPoint.xyz / unprojectedPoint.w;
+    return point.xyz / point.w;
 }
 
 void main() {
     vec3 point = positions[indices[gl_VertexIndex]];
 
+    outDepth = 0.0f;
+
     if (camera.translation.z > 0.0f) {
-        point.z = 0.9999f;
+        outDepth = 0.9999f;
     }
 
     // Points
@@ -53,11 +54,6 @@ void main() {
         point.y,
         1.0
     ).xyz;
-
-    // Camera
-    outNear           = camera.clip.x;
-    outFar            = camera.clip.y;
-    outViewProjection = camera.viewProjection;
 
     gl_Position = vec4(point, 1.0);
 }

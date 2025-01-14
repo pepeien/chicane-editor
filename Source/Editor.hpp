@@ -2,7 +2,10 @@
 
 #include "Base.hpp"
 
-namespace Editor
+namespace Chicane
 {
-    void run();
+    namespace Editor
+    {
+        void run();
+    }
 }
