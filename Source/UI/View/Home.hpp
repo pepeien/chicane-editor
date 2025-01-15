@@ -12,11 +12,11 @@ namespace Chicane
             HomeView();
 
         private:
-            std::uint32_t getFPS(const Grid::Component::Event& inEvent);
-            std::string getFrametime(const Grid::Component::Event& inEvent);
+            Grid::Reference getFPS(const Grid::Component::Event& inEvent);
+            Grid::Reference getFrametime(const Grid::Component::Event& inEvent);
 
-            void showLog(const Log::Entry& inLog);
-            void showActor(Actor* inActor);
+            void showLog(const Log::Entry* inLog);
+            void showActor(const Actor* inActor);
             void showDirectoryHistory(const std::string& inPath);
             void showDirectory(const FileSystem::Item& inList);
 
@@ -33,26 +33,34 @@ namespace Chicane
             void updateRotation();
             void updateScaling();
             void updateOutliner();
-            void updateDirHistory();
+            void updateDirHistory(const std::string& inPath);
             void listDir(const std::string& inPath);
 
         private:
-            // Render
-            std::any m_uiActors;
-            std::any m_uiSelectedActor;
-            std::vector<std::any> m_uiActorTranslation;
-            std::vector<std::any> m_uiActorRotation;
-            std::vector<std::any> m_uiActorScaling;
-
-            std::any m_uiDirectoryHistory;
-            std::any m_uiDirectoryInfo;
-
-            std::any m_uiIsConsoleOpen;
-            std::any m_uiConsoleLogs;
-
             // Internal
-            std::string m_currentDirectory;
-            Actor* m_selectedActor;
+            std::vector<std::string>      m_directoryHistory;
+            std::vector<Grid::Reference>  m_directoryHistoryRefs;
+            std::vector<FileSystem::Item> m_directoryInfo;
+            std::vector<Grid::Reference>  m_directoryInfoRefs;
+
+            std::vector<Actor*>           m_actors;
+            const Actor*                  m_actor;
+            Transform                     m_actorTransform;
+
+            bool                          m_bIsConsoleOpen;
+            std::vector<Grid::Reference>  m_consoleLogs;
+
+            // UI
+            Grid::Reference               m_uiDirectoryHistory;
+            Grid::Reference               m_uiDirectoryInfo;
+
+            Grid::Reference               m_uiActors;
+            Grid::Reference               m_uiSelectedActorTranslation;
+            Grid::Reference               m_uiSelectedActorRotation;
+            Grid::Reference               m_uiSelectedActorScale;
+
+            Grid::Reference               m_uiIsConsoleOpen;
+            Grid::Reference               m_uiConsoleLogs;
         };
     }
 }
