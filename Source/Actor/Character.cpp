@@ -17,8 +17,50 @@ namespace Chicane
 
     void AEditorCharacter::onControlAttachment()
     {
+        // Mouse
         m_controller->bindEvent(std::bind(&AEditorCharacter::onLook, this, std::placeholders::_1));
 
+        m_controller->bindEvent(
+            Controller::MouseButton::Left,
+            Controller::EventStatus::Pressed,
+            [&]()
+            {
+                if (Application::getWindow()->isFocused())
+                {
+                    return;
+                }
+
+                float mouseX = 0.0f;
+                float mouseY = 0.0f;
+                SDL_GetMouseState(&mouseX, &mouseY);
+
+                std::uint32_t width  = static_cast<std::uint32_t>(Grid::getSize("82vw"));
+                std::uint32_t height = static_cast<std::uint32_t>(Grid::getSize("80vh"));
+
+                if (mouseX > width || mouseY > height)
+                {
+                    return;
+                }
+
+                Application::getWindow()->focus();
+            }
+        );
+
+        m_controller->bindEvent(
+            Controller::MouseButton::Right,
+            Controller::EventStatus::Pressed,
+            [&]()
+            {
+                if (!Application::getWindow()->isFocused())
+                {
+                    return;
+                }
+
+                Application::getWindow()->blur();
+            }
+        );
+
+        // Keyboard
         m_controller->bindEvent(
             Controller::KeyboardKey::W,
             Controller::EventStatus::Pressed,

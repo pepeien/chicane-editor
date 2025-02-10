@@ -59,8 +59,6 @@ namespace Chicane
             initFrameResources();
             initVertexBuffers();
 
-            refreshViewport();
-
             setStatus(Layer::Status::Running);
         }
 
@@ -89,8 +87,6 @@ namespace Chicane
 
             initFramebuffers();
             initFrameResources();
-
-            refreshViewport();
 
             setStatus(Layer::Status::Running);
         }
@@ -327,15 +323,6 @@ namespace Chicane
                 m_internals.logicalDevice,
                 stagingBuffer
             );
-        }
-
-        void LGrid::refreshViewport()
-        {
-            Renderer::Viewport viewport {};
-            viewport.size.x = static_cast<std::uint32_t>(Grid::getSize("82vw"));
-            viewport.size.y = static_cast<std::uint32_t>(Grid::getSize("80vh"));
-
-            Application::getRenderer()->setViewport(viewport);
         }
     }
 }

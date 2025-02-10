@@ -29,8 +29,6 @@ namespace Chicane
             void initFrameResources();
             void initVertexBuffers();
 
-            void refreshViewport();
-
         private:
             Vulkan::Renderer::Internals                         m_internals;
 
