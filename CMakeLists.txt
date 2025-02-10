@@ -4,7 +4,7 @@ include(./.env.cmake OPTIONAL RESULT_VARIABLE LOCAL_ENV)
 ############## Setup Project #######################
 cmake_minimum_required(VERSION 3.11.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(NAME "Editor")
 
@@ -107,8 +107,6 @@ if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
                 ${MINGW_PATH}/lib
         )
     endif()
-
-    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 ##############  Add subdirectories  #######################
