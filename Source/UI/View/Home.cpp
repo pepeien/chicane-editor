@@ -1,5 +1,7 @@
 #include "UI/View/Home.hpp"
 
+#include "Actor/Mesh.hpp"
+
 constexpr const SDL_DialogFileFilter m_modelFilters[] = {
     { "All (.obj)", "obj" },
     { "Wavefront (.obj)", "obj" },
@@ -48,17 +50,12 @@ namespace Chicane
 
         Grid::Reference HomeView::getFPS(const Grid::Component::Event& inEvent)
         {
-            std::uint32_t frameRate = Application::getTelemetry().frame.rate;
-
-            return Grid::Reference::fromValue<std::uint32_t>(&frameRate);
+            return Grid::Reference::fromValue<const std::uint32_t>(&Application::getTelemetry().frame.rate);
         }
 
         Grid::Reference HomeView::getFrametime(const Grid::Component::Event& inEvent)
         {
-            std::string frametime = std::to_string(Application::getTelemetry().frame.delta);
-            frametime = std::string(frametime.begin(), frametime.end() - 5);
-
-            return Grid::Reference::fromValue<std::string>(&frametime);
+            return Grid::Reference::fromValue<const float>(&Application::getTelemetry().frame.delta);
         }
 
         void HomeView::showLog(const Log::Entry* inLog)
@@ -187,7 +184,7 @@ namespace Chicane
                 {
                     props.onClick = [&](const Grid::Component::Event& inEvent)
                     {
-                        Application::getLevel()->createActor<AMesh>()->setMesh(inItem.path);
+                        Application::getLevel()->createActor<AEditorMesh>()->setMesh(inItem.path);
                     };
                 }
 

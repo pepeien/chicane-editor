@@ -1,6 +1,7 @@
 #include "Editor.hpp"
 
-#include "Layer.hpp"
+#include "Actor/Character.hpp"
+#include "Layer/Grid.hpp"
 #include "UI/View/Home.hpp"
 
 namespace Chicane
@@ -18,8 +19,10 @@ namespace Chicane
             createInfo.window.icon    = "Content/Icon.png";
             createInfo.window.size    = Vec<2, int>(1600, 900);
             createInfo.window.display = 0;
-            createInfo.window.type   = Window::Type::Windowed;
+            createInfo.window.type    = Window::Type::Windowed;
+
             createInfo.renderer.type = Renderer::Type::Vulkan;
+
             createInfo.onSetup = [&]()
             {
                 // Controller
@@ -30,27 +33,23 @@ namespace Chicane
                 level = std::make_unique<Level>();
                 level->activate();
 
-                level->createActor<ASky>()->setSky(
-                    Box::loadSky("Content/Skies/Gray.bsky")
-                );
+                ASky* skybox = level->createActor<ASky>();
+                skybox->setSky(Box::loadSky("Content/Skies/Gray.bsky"));
 
-                level->createActor<ALight>();
+                ALight* globalLight = level->createActor<ALight>();
+                globalLight->setAbsoluteTranslation(0.0f, 0.0f, 1000.0f);
 
-                ACharacter* character = level->createActor<ACharacter>();
+                AEditorCharacter* character = level->createActor<AEditorCharacter>();
                 character->attachController(Application::getController());
-                character->setAbsoluteTranslation(Vec<3, float>(-5.0f, -7.0f, 2.0f));
-                character->setAbsoluteRotation(Vec<3, float>(0.0f, -34.5f, -12.5f));
-
-                CCamera* camera = level->createComponent<CCamera>();
-                camera->attachTo(character);
-                camera->activate();
+                character->setAbsoluteTranslation(-5.0f, -14.0f, 5.0f);
+                character->setAbsoluteRotation(-6.0f, 0.0f, 28.0f);
 
                 // UI
                 view = std::make_unique<HomeView>();
                 Application::addView(view.get());
                 Application::setView(view->getId());
 
-                // Grid
+                // Layer
                 Application::getRenderer()->pushLayer(
                     new LGrid(),
                     Chicane::Layer::PushStrategy::AfterLayer,
