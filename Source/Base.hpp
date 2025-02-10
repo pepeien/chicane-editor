@@ -10,19 +10,25 @@
 
 namespace Chicane
 {
-    class MeshActor : public Actor
+    class AMesh : public Actor
     {
     public:
-        MeshActor(const std::string& inMesh)
+        AMesh()
             : Actor(),
-            m_meshComponent(new MeshComponent())
+            m_meshComponent(nullptr)
         {
+            m_meshComponent = Application::getLevel()->createComponent<CMesh>();
             m_meshComponent->attachTo(this);
+        }
+
+    public:
+        void setMesh(const std::string& inMesh)
+        {
             m_meshComponent->setMesh(inMesh);
             m_meshComponent->activate();
         }
 
     private:
-        MeshComponent* m_meshComponent;
+        CMesh* m_meshComponent;
     };
 }

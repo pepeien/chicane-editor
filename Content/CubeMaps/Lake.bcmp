@@ -1,8 +1,0 @@
-<Asset version="1" id="Lake">
-    <Texture side="Left">Content/Textures/Lake/Left.btex</Texture>
-    <Texture side="Right">Content/Textures/Lake/Right.btex</Texture>
-    <Texture side="Front">Content/Textures/Lake/Front.btex</Texture>
-    <Texture side="Back">Content/Textures/Lake/Back.btex</Texture>
-    <Texture side="Up">Content/Textures/Lake/Up.btex</Texture>
-    <Texture side="Down">Content/Textures/Lake/Down.btex</Texture>
-</Asset>

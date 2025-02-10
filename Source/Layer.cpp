@@ -4,7 +4,7 @@ namespace Chicane
 {
     namespace Editor
     {
-        Layer::Layer()
+        LGrid::LGrid()
             : Layer::Instance("Editor"),
             m_internals(Application::getRenderer<Vulkan::Renderer>()->getInternals()),
             m_clearValues({})
@@ -12,22 +12,22 @@ namespace Chicane
             m_clearValues.push_back(vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f));
             m_clearValues.push_back(vk::ClearDepthStencilValue(0.0f, 0));
 
-            Loader::getModelManager()->watchChanges(
-                [this](Manager::EventType inEvent)
+            Box::getModelManager()->watchChanges(
+                [this](Box::Manager::EventType inEvent)
                 {
-                    if (inEvent != Manager::EventType::Activation || !is(Chicane::Layer::Status::Offline))
+                    if (inEvent != Box::Manager::EventType::Activation || !is(Layer::Status::Offline))
                     {
                         return;
                     }
 
-                    setStatus(Chicane::Layer::Status::Initialized);
+                    setStatus(Layer::Status::Initialized);
 
                     build();
                 }
             );
         }
 
-        Layer::~Layer()
+        LGrid::~LGrid()
         {
             m_internals.logicalDevice.waitIdle();
 
@@ -46,9 +46,9 @@ namespace Chicane
             );
         }
 
-        void Layer::build()
+        void LGrid::build()
         {
-            if (!is(Chicane::Layer::Status::Initialized))
+            if (!is(Layer::Status::Initialized))
             {
                 return;
             }
@@ -61,12 +61,12 @@ namespace Chicane
 
             refreshViewport();
 
-            setStatus(Chicane::Layer::Status::Running);
+            setStatus(Layer::Status::Running);
         }
 
-        void Layer::destroy()
+        void LGrid::destroy()
         {
-            if (!is(Chicane::Layer::Status::Running))
+            if (!is(Layer::Status::Running))
             {
                 return;
             }
@@ -77,12 +77,12 @@ namespace Chicane
                 m_frameDescriptor.pool
             );
 
-            setStatus(Chicane::Layer::Status::Offline);
+            setStatus(Layer::Status::Offline);
         }
 
-        void Layer::rebuild()
+        void LGrid::rebuild()
         {
-            if (!is(Chicane::Layer::Status::Offline))
+            if (!is(Layer::Status::Offline))
             {
                 return;
             }
@@ -92,12 +92,12 @@ namespace Chicane
 
             refreshViewport();
 
-            setStatus(Chicane::Layer::Status::Running);
+            setStatus(Layer::Status::Running);
         }
 
-        void Layer::render(void* outData)
+        void LGrid::render(void* outData)
         {
-            if (!is(Chicane::Layer::Status::Running))
+            if (!is(Layer::Status::Running))
             {
                 return;
             }
@@ -140,15 +140,14 @@ namespace Chicane
             commandBuffer.endRenderPass();
         }
 
-        void Layer::initFrameDescriptorSetLayout()
+        void LGrid::initFrameDescriptorSetLayout()
         {
             Vulkan::Descriptor::SetLayoutBidingsCreateInfo frameLayoutBidings;
             frameLayoutBidings.count = 1;
             frameLayoutBidings.indices.push_back(0);
             frameLayoutBidings.types.push_back(vk::DescriptorType::eUniformBuffer);
             frameLayoutBidings.counts.push_back(1);
-            frameLayoutBidings.stages.push_back(vk::ShaderStageFlagBits::eVertex);
-            frameLayoutBidings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+            frameLayoutBidings.stages.push_back(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
 
             Vulkan::Descriptor::initSetLayout(
                 m_frameDescriptor.setLayout,
@@ -157,7 +156,7 @@ namespace Chicane
             );
         }
 
-        std::vector<Vulkan::Shader::StageCreateInfo> Layer::getGraphicsPipelineShaders()
+        std::vector<Vulkan::Shader::StageCreateInfo> LGrid::getGraphicsPipelineShaders()
         {
             Vulkan::Shader::StageCreateInfo vertexShader {};
             vertexShader.path = "Content/Shaders/grid.vert.spv";
@@ -174,7 +173,7 @@ namespace Chicane
             return result;    
         }
 
-        std::vector<vk::DescriptorSetLayout> Layer::getGraphicsPipelineDescriptorLayouts()
+        std::vector<vk::DescriptorSetLayout> LGrid::getGraphicsPipelineDescriptorLayouts()
         {
             std::vector<vk::DescriptorSetLayout> result {};
             result.push_back(m_frameDescriptor.setLayout);
@@ -182,60 +181,63 @@ namespace Chicane
             return result;
         }
 
-        std::vector<vk::AttachmentDescription> Layer::getGraphicsPipelineAttachments()
+        std::vector<Vulkan::GraphicsPipeline::Attachment> LGrid::getGraphicsPipelineAttachments()
         {
-            Vulkan::GraphicsPipeline::Attachment colorAttachment {};
-            colorAttachment.format        = m_internals.swapchain->format;
+            // Attachments
+            Vulkan::GraphicsPipeline::Attachment colorAttachment = {};
+            colorAttachment.type          = Vulkan::GraphicsPipeline::Attachment::Type::Color;
+            colorAttachment.format        = m_internals.swapchain->colorFormat;
             colorAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
             colorAttachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
             colorAttachment.finalLayout   = vk::ImageLayout::ePresentSrcKHR;
 
-            Vulkan::GraphicsPipeline::Attachment depthAttachment {};
+            Vulkan::GraphicsPipeline::Attachment depthAttachment = {};
+            depthAttachment.type          = Vulkan::GraphicsPipeline::Attachment::Type::Depth;
             depthAttachment.format        = m_internals.swapchain->depthFormat;
             depthAttachment.loadOp        = vk::AttachmentLoadOp::eLoad;
             depthAttachment.initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
             depthAttachment.finalLayout   = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
-            std::vector<vk::AttachmentDescription> result {};
-            result.push_back(Vulkan::GraphicsPipeline::createColorAttachment(colorAttachment));
-            result.push_back(Vulkan::GraphicsPipeline::createDepthAttachment(depthAttachment));
+            std::vector<Vulkan::GraphicsPipeline::Attachment> result = {};
+            result.push_back(colorAttachment);
+            result.push_back(depthAttachment);
 
             return result;
         }
 
-        void Layer::initGraphicsPipeline()
+        void LGrid::initGraphicsPipeline()
         {
             Vulkan::GraphicsPipeline::CreateInfo createInfo = {};
-            createInfo.bHasVertices         = false;
-            createInfo.bHasDepthWrite       = false;
-            createInfo.bHasBlending         = true;
-            createInfo.logicalDevice        = m_internals.logicalDevice;
-            createInfo.shaders              = getGraphicsPipelineShaders();
-            createInfo.extent               = m_internals.swapchain->extent;
-            createInfo.descriptorSetLayouts = getGraphicsPipelineDescriptorLayouts();
-            createInfo.attachments          = getGraphicsPipelineAttachments();
-            createInfo.polygonMode          = vk::PolygonMode::eFill;
+            createInfo.bHasVertices             = false;
+            createInfo.bHasDepthWrite           = false;
+            createInfo.bHasBlending             = true;
+            createInfo.logicalDevice            = m_internals.logicalDevice;
+            createInfo.shaders                  = getGraphicsPipelineShaders();
+            createInfo.extent                   = m_internals.swapchain->extent;
+            createInfo.descriptorSetLayouts     = getGraphicsPipelineDescriptorLayouts();
+            createInfo.attachments              = getGraphicsPipelineAttachments();
+            createInfo.rasterizaterizationState = Vulkan::GraphicsPipeline::createRasterizationState(vk::PolygonMode::eFill);
 
             m_graphicsPipeline = std::make_unique<Vulkan::GraphicsPipeline::Instance>(createInfo);
         }
 
-        void Layer::initFramebuffers()
+        void LGrid::initFramebuffers()
         {
             for (Vulkan::Frame::Instance& frame : m_internals.swapchain->frames)
             {
                 Vulkan::Frame::Buffer::CreateInfo createInfo = {};
-                createInfo.id              = m_id;
-                createInfo.logicalDevice   = m_internals.logicalDevice;
-                createInfo.renderPass      = m_graphicsPipeline->renderPass;
-                createInfo.swapChainExtent = m_internals.swapchain->extent;
-                createInfo.attachments.push_back(frame.imageView);
-                createInfo.attachments.push_back(frame.depth.imageView);
+                createInfo.id            = m_id;
+                createInfo.logicalDevice = m_internals.logicalDevice;
+                createInfo.renderPass    = m_graphicsPipeline->renderPass;
+                createInfo.extent        = m_internals.swapchain->extent;
+                createInfo.attachments.push_back(frame.colorImage.view);
+                createInfo.attachments.push_back(frame.depthImage.view);
 
                 Vulkan::Frame::Buffer::init(frame, createInfo);
             }
         }
 
-        void Layer::initFrameResources()
+        void LGrid::initFrameResources()
         {
             Vulkan::Descriptor::PoolCreateInfo descriptorPoolCreateInfo;
             descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_internals.swapchain->frames.size());
@@ -272,7 +274,7 @@ namespace Chicane
             }
         }
 
-        void Layer::initVertexBuffers()
+        void LGrid::initVertexBuffers()
         {
             std::vector<float> vertices = {
                 0.0f, 0.0f,
@@ -327,7 +329,7 @@ namespace Chicane
             );
         }
 
-        void Layer::refreshViewport()
+        void LGrid::refreshViewport()
         {
             Renderer::Viewport viewport {};
             viewport.size.x = static_cast<std::uint32_t>(Grid::getSize("82vw"));

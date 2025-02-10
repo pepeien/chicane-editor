@@ -6,11 +6,11 @@ namespace Chicane
 {
     namespace Editor
     {
-        class Layer : public Chicane::Layer::Instance
+        class LGrid : public Chicane::Layer::Instance
         {
         public:
-            Layer();
-            ~Layer();
+            LGrid();
+            ~LGrid();
 
         public:
             void build() override;
@@ -23,7 +23,7 @@ namespace Chicane
             void initFrameDescriptorSetLayout();
             std::vector<Vulkan::Shader::StageCreateInfo> getGraphicsPipelineShaders();
             std::vector<vk::DescriptorSetLayout> getGraphicsPipelineDescriptorLayouts();
-            std::vector<vk::AttachmentDescription> getGraphicsPipelineAttachments();
+            std::vector<Vulkan::GraphicsPipeline::Attachment> getGraphicsPipelineAttachments();
             void initGraphicsPipeline();
             void initFramebuffers();
             void initFrameResources();

@@ -1,7 +1,5 @@
 #include "UI/View/Home.hpp"
 
-#include "Base.hpp"
-
 constexpr const SDL_DialogFileFilter m_modelFilters[] = {
     { "All (.obj)", "obj" },
     { "Wavefront (.obj)", "obj" },
@@ -29,15 +27,11 @@ namespace Chicane
             m_directoryInfoRefs({}),
             m_actors({}),
             m_actor(nullptr),
-            m_actorTransform({}),
             m_bIsConsoleOpen(false),
             m_consoleLogs({}),
             m_uiDirectoryHistory(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_directoryHistoryRefs)),
             m_uiDirectoryInfo(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_directoryInfoRefs)),
             m_uiActors({}),
-            m_uiSelectedActorTranslation(Grid::Reference::fromValue<Vec<3, float>>(&m_actorTransform.translation)),
-            m_uiSelectedActorRotation(Grid::Reference::fromValue<Vec<3, float>>(&m_actorTransform.rotation)),
-            m_uiSelectedActorScale(Grid::Reference::fromValue<Vec<3, float>>(&m_actorTransform.scale)),
             m_uiIsConsoleOpen(Grid::Reference::fromValue<bool>(&m_bIsConsoleOpen)),
             m_uiConsoleLogs(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_consoleLogs))
         {
@@ -61,7 +55,7 @@ namespace Chicane
 
         Grid::Reference HomeView::getFrametime(const Grid::Component::Event& inEvent)
         {
-            std::string frametime = std::to_string(Application::getTelemetry().frame.time);
+            std::string frametime = std::to_string(Application::getTelemetry().frame.delta);
             frametime = std::string(frametime.begin(), frametime.end() - 5);
 
             return Grid::Reference::fromValue<std::string>(&frametime);
@@ -77,7 +71,7 @@ namespace Chicane
             Grid::Style style {};
             style.foregroundColor = inLog->color;
 
-            Grid::TextComponent::compileRaw(inLog->text, style);
+            Grid::Text::compileRaw(inLog->text, style);
         }
 
         void HomeView::showActor(const Actor* inActor)
@@ -87,15 +81,14 @@ namespace Chicane
                 return;
             }
 
-            Grid::ButtonComponent::Props props {};
-            props.id                    = Utils::sprint("%p", inActor);
+            Grid::Button::Props props {};
+            props.id                    = String::sprint("%p", inActor);
             props.style.width           = Grid::getSize("100%");
             props.style.height          = Grid::getSize("4vh");
             props.style.backgroundColor = "#444444";
             props.onClick               = [&](const Grid::Component::Event& inEvent)
             {
-                m_actor     = inActor;
-                m_actorTransform = inActor->getTransform();
+                m_actor = inActor;
             };
             props._renderers.push_back(
                 [&](const Grid::Component::Event& inEvent)
@@ -104,23 +97,23 @@ namespace Chicane
                     style.horizontalAlignment = Grid::Style::Alignment::Center;
                     style.verticalAlignment   = Grid::Style::Alignment::Center;
 
-                    Grid::TextComponent::compileRaw(props.id, style);
+                    Grid::Text::compileRaw(props.id, style);
                 }
             );
 
-            Grid::ButtonComponent::compileRaw(props);
+            Grid::Button::compileRaw(props);
         }
 
         void HomeView::showDirectoryHistory(const std::string& inPath)
         {
-            std::vector<std::string> splittedPath = Utils::split(
+            std::vector<std::string> splittedPath = String::split(
                 inPath,
                 FileSystem::SEPARATOR
             );
 
             const std::string& folderName = splittedPath.back();
 
-            Grid::ButtonComponent::Props props {};
+            Grid::Button::Props props {};
             props.id = inPath;
             props.style.width = Grid::getSize(
                 "5vw",
@@ -144,16 +137,16 @@ namespace Chicane
                     style.horizontalAlignment = Grid::Style::Alignment::Center;
                     style.verticalAlignment   = Grid::Style::Alignment::Center;
 
-                    Grid::TextComponent::compileRaw(folderName, style);
+                    Grid::Text::compileRaw(folderName, style);
                 }
             );
 
-            Grid::ButtonComponent::compileRaw(props);
+            Grid::Button::compileRaw(props);
         }
 
         void HomeView::showDirectory(const FileSystem::Item& inItem)
         {
-            Grid::ButtonComponent::Props props {};
+            Grid::Button::Props props {};
             props.id = inItem.path;
             props.style.width = Grid::getSize(
                 Grid::AUTO_SIZE_UNIT,
@@ -183,7 +176,7 @@ namespace Chicane
 
                         std::string title = inItem.name + " - " + std::to_string(inItem.childCount) + " Items";
 
-                        Grid::TextComponent::compileRaw(title, style);
+                        Grid::Text::compileRaw(title, style);
                     }
                 );
             }
@@ -194,7 +187,7 @@ namespace Chicane
                 {
                     props.onClick = [&](const Grid::Component::Event& inEvent)
                     {
-                        Application::getLevel()->addActor(new MeshActor(inItem.path));
+                        Application::getLevel()->createActor<AMesh>()->setMesh(inItem.path);
                     };
                 }
 
@@ -205,12 +198,12 @@ namespace Chicane
                         style.horizontalAlignment = Grid::Style::Alignment::Center;
                         style.verticalAlignment   = Grid::Style::Alignment::Center;
 
-                        Grid::TextComponent::compileRaw(inItem.name, style);
+                        Grid::Text::compileRaw(inItem.name, style);
                     }
                 );
             }
 
-            Grid::ButtonComponent::compileRaw(props);
+            Grid::Button::compileRaw(props);
         }
 
         void HomeView::setupWatchers()
@@ -240,7 +233,7 @@ namespace Chicane
                     }
 
                     inLevel->watchActors(
-                        [this](Actor* inActor)
+                        [this](const std::vector<Actor*>& inActors)
                         {
                             updateOutliner();
                         }
@@ -382,9 +375,9 @@ namespace Chicane
                                 filepath += name;
                                 filepath += Box::Model::EXTENSION;
 
-                                Box::Model model(filepath);
+                                Box::Model::Instance model(filepath);
                                 model.setId(name);
-                                model.setVendor(Model::Vendor::Type::Wavefront);
+                                model.setVendor(Box::Model::Vendor::Type::Wavefront);
                                 model.setData(file.path.string());
                                 model.saveXML();
                             }
@@ -424,11 +417,11 @@ namespace Chicane
                                 filepath += name;
                                 filepath += Box::Texture::EXTENSION;
 
-                                Box::Texture model(filepath);
-                                model.setId(name);
-                                model.setVendor(Texture::Vendor::Png);
-                                model.setData(file.path.string());
-                                model.saveXML();
+                                Box::Texture::Instance texture(filepath);
+                                texture.setId(name);
+                                texture.setVendor(Box::Texture::Vendor::Png);
+                                texture.setData(file.path.string());
+                                texture.saveXML();
                             }
                         }
                     );
@@ -516,7 +509,7 @@ namespace Chicane
             m_directoryHistory     = {};
             m_directoryHistoryRefs = {};
 
-            std::vector<std::string> splittedPath = Utils::split(inPath, FileSystem::SEPARATOR);
+            std::vector<std::string> splittedPath = String::split(inPath, FileSystem::SEPARATOR);
 
             for (std::uint32_t i = 0; i < splittedPath.size(); i++)
             {
@@ -547,7 +540,7 @@ namespace Chicane
             m_directoryInfoRefs = {};
 
             std::vector<std::string> extensions {
-                Box::CubeMap::EXTENSION,
+                Box::Sky::EXTENSION,
                 Box::Mesh::EXTENSION,
                 Box::Model::EXTENSION,
                 Box::Texture::EXTENSION,

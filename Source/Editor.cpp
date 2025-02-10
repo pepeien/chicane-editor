@@ -9,36 +9,53 @@ namespace Chicane
     {
         void run()
         {
+            std::unique_ptr<Level> level;
             std::unique_ptr<HomeView> view;
+            std::unique_ptr<Controller::Instance> controller;
 
             Application::CreateInfo createInfo = {};
-            createInfo.title        = "Chicane Editor";
-            createInfo.icon         = "Content/Icon.png";
-            createInfo.resolution.x = 1600;
-            createInfo.resolution.y = 900;
-            createInfo.window       = Window::Type::Windowed;
-            createInfo.renderer     = Renderer::Type::Vulkan;
-            createInfo.display      = 0;
-            createInfo.onSetup      = [&]()
+            createInfo.window.title   = "Chicane Editor";
+            createInfo.window.icon    = "Content/Icon.png";
+            createInfo.window.size    = Vec<2, int>(1600, 900);
+            createInfo.window.display = 0;
+            createInfo.window.type   = Window::Type::Windowed;
+            createInfo.renderer.type = Renderer::Type::Vulkan;
+            createInfo.onSetup = [&]()
             {
-                view = std::make_unique<HomeView>();
+                // Controller
+                controller = std::make_unique<Controller::Instance>();
+                Application::setController(controller.get());
 
-                Application::getRenderer()->pushLayer(
-                    new Layer(),
-                    Chicane::Layer::PushStrategy::AfterLayer,
-                    "Level"
+                // Level
+                level = std::make_unique<Level>();
+                level->activate();
+
+                level->createActor<ASky>()->setSky(
+                    Box::loadSky("Content/Skies/Gray.bsky")
                 );
 
-                Loader::loadCubemap("Content/CubeMaps/Gray.bcmp");
+                level->createActor<ALight>();
 
+                ACharacter* character = level->createActor<ACharacter>();
+                character->attachController(Application::getController());
+                character->setAbsoluteTranslation(Vec<3, float>(-5.0f, -7.0f, 2.0f));
+                character->setAbsoluteRotation(Vec<3, float>(0.0f, -34.5f, -12.5f));
+
+                CCamera* camera = level->createComponent<CCamera>();
+                camera->attachTo(character);
+                camera->activate();
+
+                // UI
+                view = std::make_unique<HomeView>();
                 Application::addView(view.get());
                 Application::setView(view->getId());
 
-                CameraPawn* character = new CameraPawn();
-                character->setAbsoluteTranslation(Vec<3, float>(-5.0f, -7.0f, 2.0f));
-                character->setAbsoluteRotation(Vec<3, float>(0.0f, -34.5f, -12.5f));
-                Application::getLevel()->addActor(character);
-                Application::getController()->attachTo(character);
+                // Grid
+                Application::getRenderer()->pushLayer(
+                    new LGrid(),
+                    Chicane::Layer::PushStrategy::AfterLayer,
+                    "Level"
+                );
             };
 
             Application::run(createInfo);

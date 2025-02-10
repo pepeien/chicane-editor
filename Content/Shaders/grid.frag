@@ -2,7 +2,7 @@
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform CameraUBO {
+layout(set = 0, binding = 0) uniform CameraData {
     vec4 clip;
 
     mat4 view;

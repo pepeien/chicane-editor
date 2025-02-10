@@ -45,7 +45,6 @@ namespace Chicane
 
             std::vector<Actor*>           m_actors;
             const Actor*                  m_actor;
-            Transform                     m_actorTransform;
 
             bool                          m_bIsConsoleOpen;
             std::vector<Grid::Reference>  m_consoleLogs;
@@ -55,9 +54,6 @@ namespace Chicane
             Grid::Reference               m_uiDirectoryInfo;
 
             Grid::Reference               m_uiActors;
-            Grid::Reference               m_uiSelectedActorTranslation;
-            Grid::Reference               m_uiSelectedActorRotation;
-            Grid::Reference               m_uiSelectedActorScale;
 
             Grid::Reference               m_uiIsConsoleOpen;
             Grid::Reference               m_uiConsoleLogs;

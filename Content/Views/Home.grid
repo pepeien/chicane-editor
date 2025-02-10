@@ -55,13 +55,13 @@
             itemGetter="showDirectoryHistory"
         >
         </Container>
-        <Grid
+        <List
             id="dirContent"
             items="directoryInfo"
             itemWidth="22.8vh"
             itemHeight="4vh"
             itemGetter="showDirectory"
         >
-        </Grid>
+        </List>
     </Container>
 </View>
