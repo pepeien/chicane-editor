@@ -41,8 +41,8 @@ namespace Chicane
 
                 AEditorCharacter* character = level->createActor<AEditorCharacter>();
                 character->attachController(Application::getController());
-                character->setAbsoluteTranslation(-5.0f, -14.0f, 5.0f);
-                character->setAbsoluteRotation(-6.0f, 0.0f, 28.0f);
+                character->setAbsoluteTranslation(-8.0f, -4.0f, 4.0f);
+                character->setAbsoluteRotation(-10.0f, 0.0f, -65.0f);
 
                 // UI
                 view = std::make_unique<HomeView>();
