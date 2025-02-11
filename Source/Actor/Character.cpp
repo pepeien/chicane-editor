@@ -21,79 +21,51 @@ namespace Chicane
         m_controller->bindEvent(std::bind(&AEditorCharacter::onLook, this, std::placeholders::_1));
 
         m_controller->bindEvent(
-            Controller::MouseButton::Left,
+            Controller::Mouse::Button::Left,
             Controller::EventStatus::Pressed,
-            [&]()
-            {
-                if (Application::getWindow()->isFocused())
-                {
-                    return;
-                }
-
-                float mouseX = 0.0f;
-                float mouseY = 0.0f;
-                SDL_GetMouseState(&mouseX, &mouseY);
-
-                std::uint32_t width  = static_cast<std::uint32_t>(Grid::getSize("82vw"));
-                std::uint32_t height = static_cast<std::uint32_t>(Grid::getSize("80vh"));
-
-                if (mouseX > width || mouseY > height)
-                {
-                    return;
-                }
-
-                Application::getWindow()->focus();
-            }
+            std::bind(&AEditorCharacter::onLeftClick, this)
         );
 
         m_controller->bindEvent(
-            Controller::MouseButton::Right,
+            Controller::Mouse::Button::Right,
             Controller::EventStatus::Pressed,
-            [&]()
-            {
-                if (!Application::getWindow()->isFocused())
-                {
-                    return;
-                }
-
-                Application::getWindow()->blur();
-            }
+            std::bind(&AEditorCharacter::onRightClick, this)
         );
 
         // Keyboard
         m_controller->bindEvent(
-            Controller::KeyboardKey::W,
+            Controller::Keyboard::Key::W,
             Controller::EventStatus::Pressed,
             std::bind(&AEditorCharacter::onMoveForward, this)
         );
         m_controller->bindEvent(
-            Controller::KeyboardKey::S,
+            Controller::Keyboard::Key::S,
             Controller::EventStatus::Pressed,
             std::bind(&AEditorCharacter::onMoveBackward, this)
         );
         m_controller->bindEvent(
-            Controller::KeyboardKey::A,
+            Controller::Keyboard::Key::A,
             Controller::EventStatus::Pressed,
             std::bind(&AEditorCharacter::onMoveLeft, this)
         );
         m_controller->bindEvent(
-            Controller::KeyboardKey::D,
+            Controller::Keyboard::Key::D,
             Controller::EventStatus::Pressed,
             std::bind(&AEditorCharacter::onMoveRight, this)
         );
         m_controller->bindEvent(
-            Controller::KeyboardKey::Space,
+            Controller::Keyboard::Key::Space,
             Controller::EventStatus::Pressed,
             std::bind(&AEditorCharacter::onMoveUp, this)
         );
         m_controller->bindEvent(
-            Controller::KeyboardKey::Lctrl,
+            Controller::Keyboard::Key::Lctrl,
             Controller::EventStatus::Pressed,
             std::bind(&AEditorCharacter::onMoveDown, this)
         );
     }
 
-    void AEditorCharacter::onLook(const Controller::MouseMotionEvent& inEvent)
+    void AEditorCharacter::onLook(const Controller::Mouse::MotionEvent& inEvent)
     {
         if (!Application::getWindow()->isFocused())
         {
@@ -101,6 +73,38 @@ namespace Chicane
         }
 
         addAbsoluteRotation(-inEvent.yrel * 0.5f, 0.0f, -inEvent.xrel * 0.5f);
+    }
+
+    void AEditorCharacter::onLeftClick()
+    {
+        if (Application::getWindow()->isFocused())
+        {
+            return;
+        }
+
+        float mouseX = 0.0f;
+        float mouseY = 0.0f;
+        SDL_GetMouseState(&mouseX, &mouseY);
+
+        std::uint32_t width  = static_cast<std::uint32_t>(Grid::getSize("82vw"));
+        std::uint32_t height = static_cast<std::uint32_t>(Grid::getSize("80vh"));
+
+        if (mouseX > width || mouseY > height)
+        {
+            return;
+        }
+
+        Application::getWindow()->focus();
+    }
+
+    void AEditorCharacter::onRightClick()
+    {
+        if (!Application::getWindow()->isFocused())
+        {
+            return;
+        }
+
+        Application::getWindow()->blur();
     }
 
     void AEditorCharacter::onMoveForward()

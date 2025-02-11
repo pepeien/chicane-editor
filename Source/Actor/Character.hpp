@@ -13,7 +13,10 @@ namespace Chicane
         void onControlAttachment() override;
 
     private:
-        void onLook(const Controller::MouseMotionEvent& inEvent);
+        void onLook(const Controller::Mouse::MotionEvent& inEvent);
+
+        void onLeftClick();
+        void onRightClick();
 
         void onMoveForward();
         void onMoveBackward();
