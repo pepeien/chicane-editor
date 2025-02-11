@@ -21,7 +21,7 @@ namespace Chicane
             void showDirectory(const FileSystem::Item& inList);
 
         private:
-            void setupWatchers();
+            void setupEvents();
 
             void setupUiTelemetry();
             void setupUiActor();
@@ -29,22 +29,18 @@ namespace Chicane
             void setupUiAssetCreator();
             void setupUiConsole();
 
-            void updateTranslation();
-            void updateRotation();
-            void updateScaling();
             void updateOutliner();
-            void updateDirHistory(const std::string& inPath);
-            void listDir(const std::string& inPath);
+            void updateDirHistory(std::string inPath);
+            void updateDir(std::string inPath);
 
         private:
-            // Internal
-            std::vector<std::string>      m_directoryHistory;
-            std::vector<Grid::Reference>  m_directoryHistoryRefs;
-            std::vector<FileSystem::Item> m_directoryInfo;
-            std::vector<Grid::Reference>  m_directoryInfoRefs;
+            // References
+            std::vector<std::string>      m_rawDirectoryHistory;
+            std::vector<Grid::Reference>  m_directoryHistory;
+            std::vector<FileSystem::Item> m_rawDirectoryInfo;
+            std::vector<Grid::Reference>  m_directoryInfo;
 
-            std::vector<Actor*>           m_actors;
-            const Actor*                  m_actor;
+            std::vector<Grid::Reference>  m_actors;
 
             bool                          m_bIsConsoleOpen;
             std::vector<Grid::Reference>  m_consoleLogs;

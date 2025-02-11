@@ -16,6 +16,8 @@ constexpr const SDL_DialogFileFilter m_textureFilters[] = {
 
 namespace Chicane
 {
+    static const Grid::Reference EMPTY_REFERENCE = Grid::Reference();
+
     namespace Editor
     {
         HomeView::HomeView()
@@ -23,21 +25,20 @@ namespace Chicane
                 "editor_home",
                 "Content/Views/Home.grid"
             ),
+            m_rawDirectoryHistory({}),
             m_directoryHistory({}),
-            m_directoryHistoryRefs({}),
+            m_rawDirectoryInfo({}),
             m_directoryInfo({}),
-            m_directoryInfoRefs({}),
             m_actors({}),
-            m_actor(nullptr),
             m_bIsConsoleOpen(false),
             m_consoleLogs({}),
-            m_uiDirectoryHistory(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_directoryHistoryRefs)),
-            m_uiDirectoryInfo(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_directoryInfoRefs)),
-            m_uiActors({}),
+            m_uiDirectoryHistory(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_directoryHistory)),
+            m_uiDirectoryInfo(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_directoryInfo)),
+            m_uiActors(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_actors)),
             m_uiIsConsoleOpen(Grid::Reference::fromValue<bool>(&m_bIsConsoleOpen)),
             m_uiConsoleLogs(Grid::Reference::fromValue<std::vector<Grid::Reference>>(&m_consoleLogs))
         {
-            setupWatchers();
+            setupEvents();
 
             setupUiTelemetry();
             setupUiActor();
@@ -45,7 +46,7 @@ namespace Chicane
             setupUiAssetCreator();
             setupUiConsole();
 
-            listDir(".");
+            updateDir(".");
         }
 
         Grid::Reference HomeView::getFPS(const Grid::Component::Event& inEvent)
@@ -79,14 +80,12 @@ namespace Chicane
             }
 
             Grid::Button::Props props {};
-            props.id                    = String::sprint("%p", inActor);
+            props.id = String::sprint("%p", inActor);
+
             props.style.width           = Grid::getSize("100%");
             props.style.height          = Grid::getSize("4vh");
             props.style.backgroundColor = "#444444";
-            props.onClick               = [&](const Grid::Component::Event& inEvent)
-            {
-                m_actor = inActor;
-            };
+
             props._renderers.push_back(
                 [&](const Grid::Component::Event& inEvent)
                 {
@@ -125,7 +124,7 @@ namespace Chicane
             props.style.backgroundColor = "#444444";
             props.onClick = [&](const Grid::Component::Event& inEvent)
             {
-                listDir(inPath);
+                updateDir(inPath);
             };
             props._renderers.push_back(
                 [&](const Grid::Component::Event& inEvent)
@@ -161,7 +160,7 @@ namespace Chicane
             {
                 props.onClick = [&](const Grid::Component::Event& inEvent)
                 {
-                    listDir(inItem.path);
+                    updateDir(inItem.path);
                 };
 
                 props._renderers.push_back(
@@ -203,20 +202,16 @@ namespace Chicane
             Grid::Button::compileRaw(props);
         }
 
-        void HomeView::setupWatchers()
+        void HomeView::setupEvents()
         {
             Log::watchLogs(
                 [this](const Log::List* inLogs)
                 {
-                    m_consoleLogs = {};
+                    m_consoleLogs.clear();
 
                     for (std::uint32_t i = 0; i < inLogs->size(); i++)
                     {
-                        m_consoleLogs.push_back(
-                            Grid::Reference::fromValue<const Log::Entry>(
-                                &inLogs->at(i)
-                            )
-                        );
+                        m_consoleLogs.push_back(Grid::Reference::fromValue<const Log::Entry>(&inLogs->at(i)));
                     }
                 }
             );
@@ -264,34 +259,7 @@ namespace Chicane
                 {
                     showActor(inEvent.values[0].getValue<Actor>());
 
-                    return Grid::Reference();
-                }
-            );
-            addFunction(
-                "onTranslationChange",
-                [this](const Grid::Component::Event& inEvent)
-                {
-                    updateTranslation();
-
-                    return Grid::Reference();
-                }
-            );
-            addFunction(
-                "onRotationChange",
-                [this](const Grid::Component::Event& inEvent)
-                {
-                    updateRotation();
-
-                    return Grid::Reference();
-                }
-            );
-            addFunction(
-                "onScalingChange",
-                [this](const Grid::Component::Event& inEvent)
-                {
-                    updateScaling();
-
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
         }
@@ -317,7 +285,7 @@ namespace Chicane
                         showDirectoryHistory(*reference.getValue<const std::string>());
                     }
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
             addFunction(
@@ -334,7 +302,7 @@ namespace Chicane
                         showDirectory(*reference.getValue<const FileSystem::Item>());
                     }
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
         }
@@ -381,7 +349,7 @@ namespace Chicane
                         }
                     );
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
             addFunction(
@@ -423,7 +391,7 @@ namespace Chicane
                         }
                     );
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
         }
@@ -441,7 +409,7 @@ namespace Chicane
                 {
                     m_bIsConsoleOpen = true;
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
             addFunction(
@@ -450,7 +418,7 @@ namespace Chicane
                 {
                     m_bIsConsoleOpen = false;
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
             addFunction(
@@ -467,47 +435,28 @@ namespace Chicane
                         showLog(reference.getValue<const Log::Entry>());
                     }
 
-                    return Grid::Reference();
+                    return EMPTY_REFERENCE;
                 }
             );
         }
 
-        void HomeView::updateTranslation()
-        {
-            if (!m_actor)
-            {
-                return;
-            }
-        }
-
-        void HomeView::updateRotation()
-        {
-            if (!m_actor)
-            {
-                return;
-            }
-        }
-
-        void HomeView::updateScaling()
-        {
-            if (!m_actor)
-            {
-                return;
-            }
-        }
-
         void HomeView::updateOutliner()
         {
-            m_actors = Application::getLevel()->getActors();
+            m_actors.clear();
+
+            const std::vector<Actor*>& actors = Application::getLevel()->getActors();
+
+            for (std::uint32_t i = 0; i < actors.size(); i++)
+            {
+                m_actors.push_back(Grid::Reference::fromValue<const Actor>(actors.at(i)));
+            }
         }
 
-        void HomeView::updateDirHistory(const std::string& inPath)
+        void HomeView::updateDirHistory(std::string inPath)
         {
-            m_directoryHistory     = {};
-            m_directoryHistoryRefs = {};
-
             std::vector<std::string> splittedPath = String::split(inPath, FileSystem::SEPARATOR);
 
+            m_rawDirectoryHistory.clear();
             for (std::uint32_t i = 0; i < splittedPath.size(); i++)
             {
                 std::string path = "";
@@ -518,24 +467,18 @@ namespace Chicane
                     path += FileSystem::SEPARATOR;
                 }
 
-                m_directoryHistory.push_back(path);
+                m_rawDirectoryHistory.push_back(path);
             }
 
-            for (std::uint32_t i = 0; i < m_directoryHistory.size(); i++)
+            m_directoryHistory.clear();
+            for (std::uint32_t i = 0; i < m_rawDirectoryHistory.size(); i++)
             {
-                m_directoryHistoryRefs.push_back(
-                    Grid::Reference::fromValue<const std::string>(
-                        &m_directoryHistory.at(i)
-                    )
-                );
+                m_directoryHistory.push_back(Grid::Reference::fromValue<const std::string>(&m_rawDirectoryHistory.at(i)));
             }
         }
 
-        void HomeView::listDir(const std::string& inPath)
+        void HomeView::updateDir(std::string inPath)
         {
-            m_directoryInfo     = {};
-            m_directoryInfoRefs = {};
-
             std::vector<std::string> extensions {
                 Box::Sky::EXTENSION,
                 Box::Mesh::EXTENSION,
@@ -544,30 +487,38 @@ namespace Chicane
                 ".grid"
             };
 
+            m_rawDirectoryInfo.clear();
             for (FileSystem::Item item : FileSystem::ls(inPath))
             {
-                if (item.type == FileSystem::Item::Type::Folder)
+                switch (item.type)
                 {
-                    m_directoryInfo.push_back(item);
+                case FileSystem::Item::Type::Folder:
+                    if (item.name.empty())
+                    {
+                        continue;
+                    }
 
-                    continue;
+                    break;
+
+                case FileSystem::Item::Type::File:
+                    if (std::find(extensions.begin(), extensions.end(), item.extension) == extensions.end())
+                    {
+                        continue;
+                    }
+
+                    break;
+
+                default:
+                    break;
                 }
 
-                if (std::find(extensions.begin(), extensions.end(), item.extension) == extensions.end())
-                {
-                    continue;
-                }
-
-                m_directoryInfo.push_back(item);
+                m_rawDirectoryInfo.push_back(item);
             }
 
-            for (std::uint32_t i = 0; i < m_directoryInfo.size(); i++)
+            m_directoryInfo.clear();
+            for (std::uint32_t i = 0; i < m_rawDirectoryInfo.size(); i++)
             {
-                m_directoryInfoRefs.push_back(
-                    Grid::Reference::fromValue<const FileSystem::Item>(
-                        &m_directoryInfo.at(i)
-                    )
-                );
+                m_directoryInfo.push_back(Grid::Reference::fromValue<const FileSystem::Item>(&m_rawDirectoryInfo.at(i)));
             }
 
             updateDirHistory(inPath);
