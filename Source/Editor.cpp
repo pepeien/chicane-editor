@@ -49,19 +49,23 @@ namespace Chicane
                 Application::addView(view.get());
                 Application::setView(view->getId());
 
-                // Layer
+                // Renderer
                 Application::getRenderer()->pushLayer(
                     new LGrid(),
                     Chicane::Layer::PushStrategy::AfterLayer,
                     "Level"
                 );
 
-                // Renderer
-                Renderer::Viewport viewport {};
-                viewport.size.x = static_cast<std::uint32_t>(Grid::getSize("82vw"));
-                viewport.size.y = static_cast<std::uint32_t>(Grid::getSize("80vh"));
+                Application::getWindow()->watchSize(
+                    [&](const Vec<2, int>& inSize)
+                    {
+                        Renderer::Viewport viewport {};
+                        viewport.size.x = static_cast<std::uint32_t>(Grid::getSize("82vw"));
+                        viewport.size.y = static_cast<std::uint32_t>(Grid::getSize("80vh"));
 
-                Application::getRenderer()->setViewport(viewport);
+                        Application::getRenderer()->setViewport(viewport);
+                    }
+                );
             };
 
             Application::run(createInfo);
